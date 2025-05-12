@@ -3,19 +3,13 @@ import { getServerSession } from "next-auth";
 import prisma from "@/lib/db";
 import { authOptions } from "@/lib/auth";
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
-
 interface ExtendedUser {
   isAdmin?: boolean;
   [key: string]: unknown;
 }
 
 // GET /api/movies/[id] - Get a single movie
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
     
@@ -41,7 +35,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 }
 
 // PUT /api/movies/[id] - Update a movie (protected)
-export async function PUT(request: Request, { params }: RouteParams) {
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
     const session = await getServerSession(authOptions);
@@ -99,7 +93,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
 }
 
 // DELETE /api/movies/[id] - Delete a movie (protected)
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
     const session = await getServerSession(authOptions);
