@@ -28,10 +28,16 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        console.log("Auth: authorize function called");
         // Handle case where credentials might be undefined
         if (!credentials?.email || !credentials?.password) {
+          console.log("Auth: Missing credentials");
           return null;
         }
+        
+        console.log("Auth: Checking credentials against env vars");
+        console.log("Auth: ADMIN_EMAIL env var exists:", !!process.env.ADMIN_EMAIL);
+        console.log("Auth: ADMIN_PASSWORD env var exists:", !!process.env.ADMIN_PASSWORD);
         
         // This is a simplified example
         // In a real app, you would check against your database
@@ -39,6 +45,7 @@ export const authOptions: NextAuthOptions = {
           credentials.email === process.env.ADMIN_EMAIL &&
           credentials.password === process.env.ADMIN_PASSWORD
         ) {
+          console.log("Auth: Credentials match, returning admin user");
           return {
             id: "1",
             name: "Site Owner",
@@ -47,6 +54,7 @@ export const authOptions: NextAuthOptions = {
           } as ExtendedUser;
         }
         
+        console.log("Auth: Invalid credentials");
         return null;
       },
     }),
@@ -56,14 +64,18 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
+      console.log("Auth: JWT callback called");
       if (user) {
         token.isAdmin = (user as ExtendedUser).isAdmin;
+        console.log("Auth: Setting isAdmin in token");
       }
       return token;
     },
     async session({ session, token }) {
+      console.log("Auth: Session callback called");
       if (session.user) {
         (session as ExtendedSession).user!.isAdmin = token.isAdmin as boolean | undefined;
+        console.log("Auth: Setting isAdmin in session");
       }
       return session;
     },
@@ -72,6 +84,7 @@ export const authOptions: NextAuthOptions = {
     signIn: "/auth/signin",
     error: "/auth/error",
   },
+  debug: true, // Enable debug mode for NextAuth.js
 };
 
 export default authOptions; 

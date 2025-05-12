@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -12,24 +12,46 @@ export default function SignIn() {
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Reset loading state if sign-in takes more than 15 seconds
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    
+    if (isLoading) {
+      timeout = setTimeout(() => {
+        console.log("Sign-in timeout reached, resetting loading state");
+        setIsLoading(false);
+        setErrorMessage("Sign-in request timed out. Please check your Vercel environment variables and try again.");
+      }, 15000); // 15 second timeout
+    }
+    
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [isLoading]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
     setIsLoading(true);
+    console.log("Sign-in attempt started");
 
     try {
+      console.log("Calling NextAuth signIn");
       const result = await signIn("credentials", {
         redirect: false,
         email,
         password,
       });
+      console.log("Sign-in result:", result);
 
       if (result?.error) {
+        console.log("Sign-in error:", result.error);
         setErrorMessage("Invalid email or password");
         setIsLoading(false);
         return;
       }
 
+      console.log("Sign-in successful, redirecting to /admin");
       router.push("/admin");
     } catch (error) {
       console.error("Authentication error:", error);
