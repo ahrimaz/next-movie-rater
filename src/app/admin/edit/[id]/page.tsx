@@ -6,7 +6,6 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import RatingStars from "@/components/RatingStars";
-import { Movie } from "@/types";
 import { notFound } from "next/navigation";
 
 type EditMoviePageProps = {

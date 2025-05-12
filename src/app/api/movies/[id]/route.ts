@@ -9,6 +9,11 @@ interface RouteParams {
   };
 }
 
+interface ExtendedUser {
+  isAdmin?: boolean;
+  [key: string]: unknown;
+}
+
 // GET /api/movies/[id] - Get a single movie
 export async function GET(request: Request, { params }: RouteParams) {
   try {
@@ -42,7 +47,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     const session = await getServerSession(authOptions);
     
     // Check if user is authenticated and is admin
-    if (!session || !(session.user as any).isAdmin) {
+    if (!session || !(session.user as ExtendedUser).isAdmin) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
@@ -100,7 +105,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     const session = await getServerSession(authOptions);
     
     // Check if user is authenticated and is admin
-    if (!session || !(session.user as any).isAdmin) {
+    if (!session || !(session.user as ExtendedUser).isAdmin) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }

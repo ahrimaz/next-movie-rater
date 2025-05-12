@@ -3,6 +3,15 @@ import { getServerSession } from "next-auth";
 import prisma from "@/lib/db";
 import { authOptions } from "@/lib/auth";
 
+interface OrderBy {
+  [key: string]: 'asc' | 'desc';
+}
+
+interface ExtendedUser {
+  isAdmin?: boolean;
+  [key: string]: unknown;
+}
+
 // GET /api/movies - Get all movies
 export async function GET(request: Request) {
   try {
@@ -10,7 +19,7 @@ export async function GET(request: Request) {
     const limit = url.searchParams.get('limit');
     const sort = url.searchParams.get('sort');
     
-    let orderBy: any = { createdAt: 'desc' };
+    let orderBy: OrderBy = { createdAt: 'desc' };
     
     // Handle different sort options
     if (sort === 'newest') {
@@ -42,7 +51,7 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
     
     // Check if user is authenticated and is admin
-    if (!session || !(session.user as any).isAdmin) {
+    if (!session || !(session.user as ExtendedUser).isAdmin) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }

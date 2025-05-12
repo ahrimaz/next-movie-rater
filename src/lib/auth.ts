@@ -28,11 +28,16 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        // Handle case where credentials might be undefined
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+        
         // This is a simplified example
         // In a real app, you would check against your database
         if (
-          credentials?.email === process.env.ADMIN_EMAIL &&
-          credentials?.password === process.env.ADMIN_PASSWORD
+          credentials.email === process.env.ADMIN_EMAIL &&
+          credentials.password === process.env.ADMIN_PASSWORD
         ) {
           return {
             id: "1",

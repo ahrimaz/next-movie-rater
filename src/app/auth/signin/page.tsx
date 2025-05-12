@@ -31,7 +31,8 @@ export default function SignIn() {
       }
 
       router.push("/admin");
-    } catch (err) {
+    } catch (error) {
+      console.error("Authentication error:", error);
       setErrorMessage("An error occurred. Please try again.");
       setIsLoading(false);
     }
