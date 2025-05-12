@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Header from "@/components/Header";
@@ -9,8 +10,9 @@ import RatingStars from "@/components/RatingStars";
 import { Movie } from "@/types";
 import { notFound } from "next/navigation";
 
-export default function MoviePage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function MoviePage() {
+  const params = useParams();
+  const id = params.id as string;
   
   const [movie, setMovie] = useState<Partial<Movie> | null>(null);
   const [isLoading, setIsLoading] = useState(true);

@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import RatingStars from "@/components/RatingStars";
 import { notFound } from "next/navigation";
 
-export default function EditMoviePage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function EditMoviePage() {
+  const params = useParams();
+  const id = params.id as string;
   const router = useRouter();
   
   const [formData, setFormData] = useState({
