@@ -8,13 +8,7 @@ import Footer from "@/components/Footer";
 import RatingStars from "@/components/RatingStars";
 import { notFound } from "next/navigation";
 
-type EditMoviePageProps = {
-  params: {
-    id: string;
-  };
-};
-
-export default function EditMoviePage({ params }: EditMoviePageProps) {
+export default function EditMoviePage({ params }: { params: { id: string } }) {
   const { id } = params;
   const router = useRouter();
   

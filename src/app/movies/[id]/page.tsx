@@ -9,13 +9,7 @@ import RatingStars from "@/components/RatingStars";
 import { Movie } from "@/types";
 import { notFound } from "next/navigation";
 
-type MoviePageProps = {
-  params: {
-    id: string;
-  };
-};
-
-export default function MoviePage({ params }: MoviePageProps) {
+export default function MoviePage({ params }: { params: { id: string } }) {
   const { id } = params;
   
   const [movie, setMovie] = useState<Partial<Movie> | null>(null);
