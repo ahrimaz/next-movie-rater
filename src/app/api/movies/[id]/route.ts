@@ -93,9 +93,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 }
 
 // DELETE /api/movies/[id] - Delete a movie (protected)
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     // Check if user is authenticated and is admin
