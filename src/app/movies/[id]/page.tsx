@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import RatingStars from "@/components/RatingStars";
 import { Movie } from "@/types";
-import { notFound, useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
 
 type MoviePageProps = {
   params: {
@@ -16,7 +17,6 @@ type MoviePageProps = {
 
 export default function MoviePage({ params }: MoviePageProps) {
   const { id } = params;
-  const router = useRouter();
   
   const [movie, setMovie] = useState<Partial<Movie> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -106,11 +106,15 @@ export default function MoviePage({ params }: MoviePageProps) {
           {/* Movie poster */}
           <div className="aspect-[2/3] bg-gray-200 rounded overflow-hidden">
             {movie.poster ? (
-              <img
-                src={movie.poster}
-                alt={`${movie.title} poster`}
-                className="w-full h-full object-cover"
-              />
+              <div className="relative w-full h-full">
+                <Image
+                  src={movie.poster}
+                  alt={`${movie.title} poster`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+              </div>
             ) : (
               <div className="flex items-center justify-center w-full h-full bg-gray-300 text-gray-500">
                 No poster available

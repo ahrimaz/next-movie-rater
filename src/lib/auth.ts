@@ -1,6 +1,22 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+// Extend the user type
+interface ExtendedUser {
+  id: string;
+  name?: string;
+  email?: string;
+  isAdmin: boolean;
+}
+
+// Extend the session type
+interface ExtendedSession {
+  user?: {
+    isAdmin?: boolean;
+    [key: string]: unknown;
+  };
+}
+
 // This is a simplified auth setup
 // In a real app, you would use proper password hashing and database integration
 export const authOptions: NextAuthOptions = {
@@ -23,7 +39,7 @@ export const authOptions: NextAuthOptions = {
             name: "Site Owner",
             email: credentials.email,
             isAdmin: true,
-          };
+          } as ExtendedUser;
         }
         
         return null;
@@ -36,13 +52,13 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.isAdmin = user.isAdmin;
+        token.isAdmin = (user as ExtendedUser).isAdmin;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).isAdmin = token.isAdmin;
+        (session as ExtendedSession).user!.isAdmin = token.isAdmin as boolean | undefined;
       }
       return session;
     },

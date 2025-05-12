@@ -11,7 +11,7 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient();
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 // Use Vercel Postgres directly for simpler queries
-export async function executeQuery(query: string, values: any[] = []) {
+export async function executeQuery(query: string, values: unknown[] = []) {
   try {
     const result = await sql.query(query, values);
     return result;

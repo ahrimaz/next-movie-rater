@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import RatingStars from './RatingStars';
 
 type MovieProps = {
@@ -16,11 +17,15 @@ export const MovieCard = ({ id, title, director, year, poster, rating }: MoviePr
       <Link href={`/movies/${id}`} className="block">
         <div className="aspect-[2/3] bg-gray-200 relative">
           {poster ? (
-            <img 
-              src={poster} 
-              alt={`${title} poster`} 
-              className="w-full h-full object-cover"
-            />
+            <div className="relative w-full h-full">
+              <Image 
+                src={poster} 
+                alt={`${title} poster`} 
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+            </div>
           ) : (
             <div className="flex items-center justify-center w-full h-full bg-gray-300 text-gray-500">
               No poster

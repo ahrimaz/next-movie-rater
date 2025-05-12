@@ -9,12 +9,12 @@ export default function SignIn() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setErrorMessage("");
     setIsLoading(true);
 
     try {
@@ -25,14 +25,14 @@ export default function SignIn() {
       });
 
       if (result?.error) {
-        setError("Invalid email or password");
+        setErrorMessage("Invalid email or password");
         setIsLoading(false);
         return;
       }
 
       router.push("/admin");
-    } catch (error) {
-      setError("An error occurred. Please try again.");
+    } catch (err) {
+      setErrorMessage("An error occurred. Please try again.");
       setIsLoading(false);
     }
   };
@@ -45,9 +45,9 @@ export default function SignIn() {
           <p className="text-gray-600 mt-2">Sign in to access admin features</p>
         </div>
 
-        {error && (
+        {errorMessage && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
-            {error}
+            {errorMessage}
           </div>
         )}
 
@@ -86,19 +86,20 @@ export default function SignIn() {
             />
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-            >
-              {isLoading ? "Signing in..." : "Sign In"}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+          >
+            {isLoading ? "Signing in..." : "Sign in"}
+          </button>
         </form>
 
         <div className="mt-6 text-center">
-          <Link href="/" className="text-blue-600 hover:underline">
+          <Link
+            href="/"
+            className="text-sm text-blue-600 hover:underline"
+          >
             Back to home
           </Link>
         </div>
