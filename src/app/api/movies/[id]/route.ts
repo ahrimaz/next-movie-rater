@@ -9,9 +9,9 @@ interface ExtendedUser {
 }
 
 // GET /api/movies/[id] - Get a single movie
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     
     const movie = await prisma.movie.findUnique({
       where: { id }
