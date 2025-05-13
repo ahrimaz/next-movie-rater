@@ -28,6 +28,7 @@ async function main() {
       poster: 'https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg',
       rating: 5,
       review: 'A timeless classic about hope and redemption.',
+      userId: adminUser.id, // Associate with admin user
     },
     {
       title: 'The Godfather',
@@ -36,6 +37,7 @@ async function main() {
       poster: 'https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg',
       rating: 5,
       review: 'An offer you can\'t refuse - the definitive gangster film.',
+      userId: adminUser.id, // Associate with admin user
     },
     {
       title: 'Pulp Fiction',
@@ -44,6 +46,7 @@ async function main() {
       poster: 'https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg',
       rating: 4,
       review: 'Revolutionary storytelling with unforgettable characters.',
+      userId: adminUser.id, // Associate with admin user
     },
   ];
 
@@ -53,6 +56,30 @@ async function main() {
     });
     console.log(`Created movie: ${createdMovie.title}`);
   }
+
+  // Create a regular user for testing
+  const regularUser = await prisma.user.create({
+    data: {
+      email: 'user@example.com',
+      name: 'Test User',
+      isAdmin: false,
+    },
+  });
+
+  console.log(`Created regular user: ${regularUser.email}`);
+
+  // Create a sample movie rated by regular user
+  await prisma.movie.create({
+    data: {
+      title: 'Inception',
+      director: 'Christopher Nolan',
+      year: 2010,
+      poster: 'https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg',
+      rating: 4,
+      review: 'A mind-bending journey through dreams within dreams.',
+      userId: regularUser.id, // Associate with regular user
+    }
+  });
 
   console.log(`Database has been seeded.`);
 }

@@ -1,39 +1,98 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import prisma from "@/lib/db";
-import { authOptions } from "@/lib/auth";
+import { getServerSession } from "next-auth/next";
+import { PrismaClient } from "@prisma/client";
+import authOptions from "@/lib/auth";
 
-interface OrderBy {
-  [key: string]: 'asc' | 'desc';
-}
+const prisma = new PrismaClient();
 
+// Extended user type for session
 interface ExtendedUser {
+  id?: string;
+  name?: string;
+  email?: string;
   isAdmin?: boolean;
-  [key: string]: unknown;
 }
 
-// GET /api/movies - Get all movies
+interface ExtendedSession {
+  user?: ExtendedUser;
+}
+
+// GET /api/movies - Get all movies or filtered by userId
 export async function GET(request: Request) {
   try {
-    const url = new URL(request.url);
-    const limit = url.searchParams.get('limit');
-    const sort = url.searchParams.get('sort');
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("userId");
+    const isAdmin = searchParams.get("isAdmin") === "true";
     
-    let orderBy: OrderBy = { createdAt: 'desc' };
+    let movies;
     
-    // Handle different sort options
-    if (sort === 'newest') {
-      orderBy = { createdAt: 'desc' };
-    } else if (sort === 'rating') {
-      orderBy = { rating: 'desc' };
-    } else if (sort === 'title') {
-      orderBy = { title: 'asc' };
+    // Filter by userId if provided
+    if (userId) {
+      movies = await prisma.movie.findMany({
+        where: {
+          userId: userId
+        },
+        orderBy: {
+          createdAt: "desc"
+        },
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+              isAdmin: true
+            }
+          }
+        }
+      });
+    } 
+    // Only show admin movies if isAdmin flag is set
+    else if (isAdmin) {
+      const adminUsers = await prisma.user.findMany({
+        where: {
+          isAdmin: true
+        }
+      });
+      
+      const adminUserIds = adminUsers.map(user => user.id);
+      
+      movies = await prisma.movie.findMany({
+        where: {
+          userId: {
+            in: adminUserIds
+          }
+        },
+        orderBy: {
+          createdAt: "desc"
+        },
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+              isAdmin: true
+            }
+          }
+        }
+      });
     }
-    
-    const movies = await prisma.movie.findMany({
-      orderBy,
-      ...(limit ? { take: parseInt(limit) } : {})
-    });
+    // Otherwise, get all movies
+    else {
+      movies = await prisma.movie.findMany({
+        orderBy: {
+          createdAt: "desc"
+        },
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+              isAdmin: true
+            }
+          }
+        }
+      });
+    }
     
     return NextResponse.json({ success: true, data: movies });
   } catch (error) {
@@ -45,13 +104,13 @@ export async function GET(request: Request) {
   }
 }
 
-// POST /api/movies - Create a new movie (protected)
+// POST /api/movies - Create a new movie
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions) as ExtendedSession | null;
     
-    // Check if user is authenticated and is admin
-    if (!session || !(session.user as ExtendedUser).isAdmin) {
+    // Check if user is authenticated
+    if (!session || !session.user || !session.user.id) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
@@ -76,6 +135,7 @@ export async function POST(request: Request) {
         poster: body.poster || null,
         rating: body.rating,
         review: body.review || null,
+        userId: session.user.id, // Associate movie with current user
       }
     });
     

@@ -1,13 +1,13 @@
 This is a Next.JS project.
 
-The aim of the project is to act a simple website with which I can rate movies.
+The aim of the project is to act as a simple website for rating movies.
 
-Only I, the owner, should be able to login to the site.
+The site allows:
+- Admin ratings (displayed on the homepage)
+- User registration and user-specific ratings
+- Public viewing of all ratings
 
-Ratings should be viewable by any visitors.
-Visitors will not be able to post comments or sign up for their own account.
-
-The primary page will be the homepage, that will display the latest ratings.
+Each user's ratings are associated with their account and displayed on their own page.
 
 ## Project Structure
 
@@ -15,18 +15,27 @@ The primary page will be the homepage, that will display the latest ratings.
 next-movie-rater/
 ├── src/
 │   ├── app/
-│   │   ├── page.tsx                  # Homepage - displays latest ratings
+│   │   ├── page.tsx                  # Homepage - displays admin's latest ratings
 │   │   ├── layout.tsx                # Root layout
 │   │   ├── admin/                    # Admin section (protected)
 │   │   │   ├── page.tsx              # Admin dashboard
 │   │   │   ├── add/page.tsx          # Add new movie rating
 │   │   │   └── edit/[id]/page.tsx    # Edit existing rating
+│   │   ├── user/                     # User-specific section
+│   │   │   ├── page.tsx              # User's ratings page
+│   │   │   ├── settings/page.tsx     # User account settings
+│   │   │   ├── add/page.tsx          # Add new movie rating (for user)
+│   │   │   └── edit/[id]/page.tsx    # Edit existing rating (for user)
 │   │   ├── movies/                   # Public movie ratings
 │   │   │   ├── page.tsx              # All movies list
 │   │   │   └── [id]/page.tsx         # Single movie details
+│   │   ├── auth/                     # Authentication pages
+│   │   │   ├── signin/page.tsx       # Sign in page
+│   │   │   └── signup/page.tsx       # Sign up page
 │   │   └── api/                      # API routes
 │   │       ├── auth/[...nextauth]/route.ts  # Auth endpoints
 │   │       ├── movies/route.ts       # Movie data endpoints
+│   │       ├── users/route.ts        # User-related endpoints
 │   │       └── tmdb/                 # TMDB API integration
 │   │           ├── search/route.ts   # Search movies on TMDB
 │   │           └── movie/[id]/route.ts # Get movie details from TMDB
@@ -34,6 +43,8 @@ next-movie-rater/
 │   │   ├── MovieCard.tsx             # Movie card component
 │   │   ├── RatingStars.tsx           # Star rating component
 │   │   ├── Header.tsx                # Site header
+│   │   ├── UserMenu.tsx              # User dropdown menu
+│   │   ├── AuthForms.tsx             # Sign in/up forms
 │   │   └── Footer.tsx                # Site footer
 │   ├── lib/                          # Library code
 │   │   ├── db.ts                     # Database client
@@ -57,6 +68,8 @@ model Movie {
   review      String?  // Optional review text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  userId      String   // Reference to the user who created the rating
+  user        User     @relation(fields: [userId], references: [id])
 }
 
 model User {
@@ -64,6 +77,8 @@ model User {
   email       String   @unique
   name        String?
   isAdmin     Boolean  @default(false)
+  movies      Movie[]  // Relation to user's movie ratings
+  createdAt   DateTime @default(now())
 }
 ```
 
@@ -82,24 +97,79 @@ model User {
    - View all movie ratings
    - View single movie details
    - Sort/filter movies by rating, date, etc.
+   - Register for an account
 
-2. **Admin Only**
-   - Secure login
+2. **Registered Users**
+   - Sign in to personal account
    - Add new movie ratings
-   - Edit existing ratings
-   - Delete ratings
+   - Edit/delete own ratings
+   - View personal ratings page
    - Search for movies using TMDB API
+
+3. **Admin Only**
+   - Manage all ratings
+   - Admin dashboard with statistics
+   - Special admin privileges
 
 ## Implementation Plan
 
-1. Setup database with Prisma
-2. Implement authentication with NextAuth.js
-3. Create core components and layouts
-4. Build movie list and detail pages
-5. Implement admin functionality
-6. Add sorting and filtering
-7. Polish UI/UX
-8. Integrate with TMDB API for movie data
+1. **Update Database Schema**
+   - Modify the Movie model to include a relation to the User model
+   - Add a movies relation field to the User model
+   - Run migration to update the database structure
+   - Update existing movie records to associate with the admin user
+
+2. **Extend Authentication System**
+   - Implement user registration functionality
+   - Update NextAuth configuration to support regular user accounts
+   - Add password hashing and secure storage
+   - Create signup page and forms
+   - Modify authorization middleware to handle user vs admin permissions
+
+3. **Create User-Specific Pages**
+   - Implement user dashboard at /user route
+   - Create user movie rating pages with same layout as admin pages
+   - Add user settings page for profile management
+   - Ensure all user pages have proper authorization checks
+
+4. **Update Movie Creation/Editing**
+   - Modify movie creation to associate with the current logged-in user
+   - Update movie editing to verify ownership before allowing changes
+   - Add user-specific movie filtering in the database queries
+
+5. **Homepage Modification**
+   - Update homepage queries to only display admin ratings
+   - Ensure proper filtering of movies by admin user ID
+
+6. **User Profile Implementation**
+   - Create user profile page that displays only that user's ratings
+   - Implement the same layout and functionality as the homepage
+   - Add user information display
+
+7. **UI Component Updates**
+   - Create UserMenu component for the header
+   - Add authentication status indicators
+   - Update navigation to show appropriate links based on user role
+   - Implement AuthForms component for sign-in/sign-up
+
+8. **Authorization & Security**
+   - Update middleware to protect routes based on user roles
+   - Implement proper error handling for unauthorized access
+   - Add CSRF protection for forms
+   - Ensure proper validation of user input
+
+9. **Testing**
+   - Test user registration flow
+   - Verify proper association of movies with users
+   - Test authorization boundaries between users
+   - Ensure homepage only shows admin ratings
+   - Verify user profile pages display correct ratings
+
+10. **Deployment & Monitoring**
+    - Update environment variables for production
+    - Deploy updated application
+    - Monitor for any authentication or database issues
+    - Set up error logging for security-related events
 
 ## Required Dependencies
 
