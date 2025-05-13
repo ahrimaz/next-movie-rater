@@ -9,11 +9,12 @@ import Footer from "@/components/Footer";
 import ShareButton from "@/components/ShareButton";
 import { Movie } from "@/types";
 
-// Extended user type to include ID
+// Extended user type to include ID and username
 interface ExtendedUser {
   id?: string;
   name?: string | null;
   email?: string | null;
+  username?: string | null;
   isAdmin?: boolean;
 }
 
@@ -32,35 +33,45 @@ export default function UserDashboard() {
     }
   }, [status, router]);
   
-  // Fetch user's movies
+  // Fetch user details and movies
   useEffect(() => {
-    async function fetchUserMovies() {
+    async function fetchUserData() {
       if (status !== "authenticated") return;
       
       const user = session?.user as ExtendedUser;
       if (!user?.id) return;
       
       try {
-        const response = await fetch(`/api/movies?userId=${user.id}`);
-        const data = await response.json();
+        // First, get the full user data to get the username
+        const userResponse = await fetch(`/api/users/${user.id}`);
+        const userData = await userResponse.json();
         
-        if (!data.success) {
-          throw new Error(data.error || "Failed to fetch movies");
+        if (!userData.success) {
+          throw new Error(userData.error || "Failed to fetch user data");
         }
         
-        setMovies(data.data);
+        // Then get the user's movies
+        const moviesResponse = await fetch(`/api/movies?userId=${user.id}`);
+        const moviesData = await moviesResponse.json();
         
-        // Set the share URL based on the user's ID
-        setShareUrl(`${window.location.origin}/profiles/${user.id}`);
+        if (!moviesData.success) {
+          throw new Error(moviesData.error || "Failed to fetch movies");
+        }
+        
+        setMovies(moviesData.data);
+        
+        // Set the share URL based on the username if available, otherwise fall back to ID
+        const urlIdentifier = userData.data.username || user.id;
+        setShareUrl(`${window.location.origin}/profiles/${urlIdentifier}`);
       } catch (err) {
-        console.error("Error fetching user movies:", err);
-        setError("Failed to load your movies. Please try again later.");
+        console.error("Error fetching user data:", err);
+        setError("Failed to load your data. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     }
     
-    fetchUserMovies();
+    fetchUserData();
   }, [session, status]);
   
   // Handle loading and authentication state

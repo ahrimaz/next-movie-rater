@@ -10,23 +10,6 @@ const ShareButton = ({ url, title = 'Share', className = '' }: ShareButtonProps)
   const [showTooltip, setShowTooltip] = useState(false);
 
   const handleShare = () => {
-    // Check if Web Share API is available
-    if (navigator.share) {
-      navigator.share({
-        title: 'Movie Ratings',
-        text: 'Check out these movie ratings!',
-        url: url
-      })
-      .catch(err => {
-        console.error('Error sharing: ', err);
-        copyToClipboard();
-      });
-    } else {
-      copyToClipboard();
-    }
-  };
-
-  const copyToClipboard = () => {
     navigator.clipboard.writeText(url)
       .then(() => {
         setShowTooltip(true);

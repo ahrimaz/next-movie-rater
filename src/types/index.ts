@@ -15,6 +15,7 @@ export type Movie = {
 export type User = {
   id: string;
   email: string;
+  username?: string;
   name?: string;
   isAdmin: boolean;
 };

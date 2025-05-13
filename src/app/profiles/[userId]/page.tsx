@@ -8,9 +8,13 @@ import Footer from "@/components/Footer";
 import ShareButton from "@/components/ShareButton";
 import { Movie, User } from "@/types";
 
+interface ExtendedUser extends User {
+  username?: string;
+}
+
 export default function UserProfile() {
   const { userId } = useParams();
-  const [user, setUser] = useState<Partial<User> | null>(null);
+  const [user, setUser] = useState<Partial<ExtendedUser> | null>(null);
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +24,7 @@ export default function UserProfile() {
   useEffect(() => {
     async function fetchUserProfile() {
       try {
-        // First fetch user data
+        // First fetch user data using ID or username
         const userResponse = await fetch(`/api/users/${userId}`);
         const userData = await userResponse.json();
         
@@ -31,7 +35,7 @@ export default function UserProfile() {
         setUser(userData.data);
         
         // Then fetch user's movies
-        const moviesResponse = await fetch(`/api/movies?userId=${userId}`);
+        const moviesResponse = await fetch(`/api/movies?userId=${userData.data.id}`);
         const moviesData = await moviesResponse.json();
         
         if (!moviesData.success) {
@@ -40,8 +44,9 @@ export default function UserProfile() {
         
         setMovies(moviesData.data);
         
-        // Set the share URL
-        setShareUrl(`${window.location.origin}/profiles/${userId}`);
+        // Set the share URL with the user's username if available, otherwise use ID
+        const urlIdentifier = userData.data.username || userId;
+        setShareUrl(`${window.location.origin}/profiles/${urlIdentifier}`);
       } catch (err) {
         console.error("Error fetching user profile:", err);
         setError("Failed to load this user's profile. Please try again later.");
@@ -93,7 +98,10 @@ export default function UserProfile() {
           <div className="flex justify-between items-center mb-8">
             <div>
               <h1 className="text-3xl font-bold">{user.name || "User"}&apos;s Movie Ratings</h1>
-              <p className="text-gray-600 mt-2">Public profile</p>
+              {user.username && (
+                <p className="text-gray-600 mt-1">@{user.username}</p>
+              )}
+              <p className="text-gray-600 mt-1">Public profile</p>
             </div>
             <ShareButton url={shareUrl} title="Share This Profile" />
           </div>

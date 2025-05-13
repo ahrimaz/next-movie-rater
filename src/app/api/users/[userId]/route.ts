@@ -1,20 +1,13 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/db";
+import { getUser } from "@/lib/username";
 
 // GET /api/users/[userId] - Get a user's public profile
 export async function GET(request: Request, { params }: { params: Promise<{ userId: string }> }) {
   try {
     const { userId } = await params;
     
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        name: true,
-        isAdmin: true,
-        // Don't include email for privacy reasons
-      }
-    });
+    // Find user by ID or username
+    const user = await getUser(userId);
     
     if (!user) {
       return NextResponse.json(
@@ -23,7 +16,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
       );
     }
     
-    return NextResponse.json({ success: true, data: user });
+    return NextResponse.json({ 
+      success: true, 
+      data: {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        isAdmin: user.isAdmin
+      }
+    });
   } catch (error) {
     console.error("Error fetching user:", error);
     return NextResponse.json(
