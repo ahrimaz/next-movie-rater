@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import RatingStars from "@/components/RatingStars";
@@ -28,7 +29,7 @@ interface TMDBMovieDetails {
 }
 
 export default function UserAddMoviePage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   
   // Redirect if not authenticated
@@ -246,9 +247,11 @@ export default function UserAddMoviePage() {
                     >
                       <div className="flex-shrink-0 w-12 h-16 bg-gray-200 mr-3 relative overflow-hidden">
                         {movie.poster_path ? (
-                          <img 
+                          <Image 
                             src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`} 
                             alt={`${movie.title} poster`}
+                            width={92}
+                            height={138}
                             className="object-cover w-full h-full"
                           />
                         ) : (
@@ -339,9 +342,11 @@ export default function UserAddMoviePage() {
               <div className="mt-2">
                 <p className="text-sm text-gray-600 mb-1">Poster Preview:</p>
                 <div className="w-32 h-48 bg-gray-200 relative overflow-hidden">
-                  <img
+                  <Image
                     src={formData.poster}
                     alt="Movie poster preview"
+                    width={128}
+                    height={192}
                     className={`w-full h-full object-cover ${posterError ? 'hidden' : 'block'}`}
                     onError={handlePosterError}
                   />
