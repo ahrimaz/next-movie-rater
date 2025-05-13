@@ -17,14 +17,14 @@ export async function GET() {
     
     // Create or find admin user
     let adminUser = await prisma.user.findFirst({
-      where: { email: "admin@example.com" }
+      where: { email: "eric.stanard@gmail.com" }
     });
     
     if (!adminUser) {
       adminUser = await prisma.user.create({
         data: {
           name: "Admin User",
-          email: "admin@example.com",
+          email: "eric.stanard@gmail.com",
           isAdmin: true,
         }
       });
