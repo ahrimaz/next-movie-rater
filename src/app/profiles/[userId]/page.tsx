@@ -92,7 +92,7 @@ export default function UserProfile() {
         <section className="mb-10">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl font-bold">{user.name || "User"}'s Movie Ratings</h1>
+              <h1 className="text-3xl font-bold">{user.name || "User"}&apos;s Movie Ratings</h1>
               <p className="text-gray-600 mt-2">Public profile</p>
             </div>
             <ShareButton url={shareUrl} title="Share This Profile" />

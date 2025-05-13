@@ -52,7 +52,7 @@ export default function MoviesPage() {
 
       <main>
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">Eric's Movies</h1>
+          <h1 className="text-2xl font-bold">Eric&apos;s Movies</h1>
           
           <div className="flex gap-2">
             <select 

@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 
 // GET /api/users/[userId] - Get a user's public profile
-export async function GET(request: Request, { params }: { params: { userId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ userId: string }> }) {
   try {
-    const { userId } = params;
+    const { userId } = await params;
     
     const user = await prisma.user.findUnique({
       where: { id: userId },
