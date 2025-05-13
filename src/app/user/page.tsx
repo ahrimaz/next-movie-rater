@@ -103,7 +103,7 @@ export default function UserDashboard() {
             <div className="text-center py-10 border rounded-lg p-8 bg-gray-50">
               <h3 className="text-xl font-semibold mb-2">No Ratings Yet</h3>
               <p className="text-gray-500 mb-6">
-                You haven't rated any movies yet. Start by adding your first movie rating!
+                You haven&apos;t rated any movies yet. Start by adding your first movie rating!
               </p>
               <a 
                 href="/user/add" 

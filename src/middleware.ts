@@ -47,5 +47,5 @@ export async function middleware(request: NextRequest) {
 
 // Specify the paths that should be checked by the middleware
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/user/:path*"],
 }; 

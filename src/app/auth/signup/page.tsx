@@ -5,6 +5,12 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+// Define a proper error type
+interface RegisterError {
+  message?: string;
+  [key: string]: unknown;
+}
+
 export default function SignUp() {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -67,9 +73,11 @@ export default function SignUp() {
 
       // Redirect to user dashboard
       router.push("/user");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Registration error:", error);
-      setErrorMessage(error.message || "Registration failed. Please try again.");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Registration failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
