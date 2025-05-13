@@ -15,6 +15,21 @@ export async function GET() {
       });
     }
     
+    // Create or find admin user
+    let adminUser = await prisma.user.findFirst({
+      where: { email: "admin@example.com" }
+    });
+    
+    if (!adminUser) {
+      adminUser = await prisma.user.create({
+        data: {
+          name: "Admin User",
+          email: "admin@example.com",
+          isAdmin: true,
+        }
+      });
+    }
+    
     // Sample movie data
     const movies = [
       { 
@@ -23,6 +38,7 @@ export async function GET() {
         year: 2010, 
         rating: 5,
         review: 'A mind-bending thriller about dream invasion. The concept of planting ideas in someone\'s mind through their dreams is brilliantly executed.',
+        userId: adminUser.id
       },
       { 
         title: 'The Godfather', 
@@ -30,6 +46,7 @@ export async function GET() {
         year: 1972, 
         rating: 5,
         review: 'A cinematic masterpiece that revolutionized gangster films. The performances, particularly by Marlon Brando and Al Pacino, are legendary.',
+        userId: adminUser.id
       },
       { 
         title: 'Pulp Fiction', 
@@ -37,6 +54,7 @@ export async function GET() {
         year: 1994, 
         rating: 4,
         review: 'A nonlinear narrative that redefined filmmaking in the 90s. The dialogue is sharp and witty, and the characters are unforgettable.',
+        userId: adminUser.id
       },
       { 
         title: 'The Dark Knight', 
@@ -44,6 +62,7 @@ export async function GET() {
         year: 2008, 
         rating: 5,
         review: 'An exceptional superhero film that transcends the genre. Heath Ledger\'s performance as the Joker is iconic.',
+        userId: adminUser.id
       },
       { 
         title: 'Fight Club', 
@@ -51,6 +70,7 @@ export async function GET() {
         year: 1999, 
         rating: 4,
         review: 'A psychological thriller with a twist that changes everything. The commentary on consumerism and masculinity remains relevant.',
+        userId: adminUser.id
       },
     ];
     
