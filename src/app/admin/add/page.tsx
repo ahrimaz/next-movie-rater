@@ -98,6 +98,12 @@ export default function AddMoviePage() {
       setError(null);
       
       const response = await fetch(`/api/tmdb/movie/${movieId}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Error ${response.status}: Failed to get movie details`);
+      }
+      
       const data = await response.json();
       
       if (!data.success) {

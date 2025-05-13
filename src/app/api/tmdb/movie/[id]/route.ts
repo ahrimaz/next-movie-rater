@@ -15,7 +15,7 @@ interface TMDBCreditsResponse {
 // This endpoint gets detailed information about a specific movie from TMDB
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Make sure the TMDB API key is configured
@@ -27,7 +27,7 @@ export async function GET(
       );
     }
     
-    const id = params.id;
+    const { id } = await params;
     
     // Get basic movie details
     const movieResponse = await fetch(
