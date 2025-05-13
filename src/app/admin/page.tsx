@@ -6,18 +6,46 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import RatingStars from "@/components/RatingStars";
 import { Movie } from "@/types";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
+// Extend the Session user type
+interface ExtendedUser {
+  isAdmin?: boolean;
+  name?: string | null;
+  email?: string | null;
+  id?: string;
+}
 
 export default function AdminPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [movies, setMovies] = useState<Partial<Movie>[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  // Check if user is admin and redirect if not
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth/signin?callbackUrl=/admin");
+      return;
+    }
+    
+    if (status === "authenticated" && !(session?.user as ExtendedUser)?.isAdmin) {
+      console.log("Non-admin user attempted to access admin page, redirecting to homepage");
+      router.push("/");
+      return;
+    }
+  }, [status, session, router]);
+
   useEffect(() => {
     const fetchMovies = async () => {
+      if (status !== "authenticated" || !(session?.user as ExtendedUser)?.isAdmin) return;
+      
       try {
         setIsLoading(true);
-        const response = await fetch("/api/movies");
+        const response = await fetch("/api/movies?isAdmin=true");
         const data = await response.json();
         
         if (!data.success) {
@@ -35,7 +63,7 @@ export default function AdminPage() {
     };
 
     fetchMovies();
-  }, []);
+  }, [session, status]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this movie?")) {
@@ -63,6 +91,22 @@ export default function AdminPage() {
       setDeleteId(null);
     }
   };
+
+  // Show loading state if session is still loading
+  if (status === "loading") {
+    return (
+      <div className="max-w-5xl mx-auto p-4">
+        <Header showAdminLink={false} />
+        <main>
+          <div className="text-center py-10">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+            <p className="mt-2 text-gray-500">Loading...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto p-4">
