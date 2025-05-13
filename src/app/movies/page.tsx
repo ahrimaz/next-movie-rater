@@ -16,10 +16,10 @@ export default function MoviesPage() {
     const fetchMovies = async () => {
       try {
         setIsLoading(true);
-        let url = "/api/movies";
+        let url = "/api/movies?isAdmin=true";
         
         if (sortOption) {
-          url += `?sort=${sortOption}`;
+          url += `&sort=${sortOption}`;
         }
         
         const response = await fetch(url);
@@ -52,7 +52,7 @@ export default function MoviesPage() {
 
       <main>
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">All Movies</h1>
+          <h1 className="text-2xl font-bold">All Admin Movies</h1>
           
           <div className="flex gap-2">
             <select 

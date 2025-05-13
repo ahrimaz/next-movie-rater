@@ -39,7 +39,7 @@ export default function HomePage() {
       
       <main>
         <section className="mb-10">
-          <h1 className="text-3xl font-bold mb-6">Latest Admin Ratings</h1>
+          <h1 className="text-3xl font-bold mb-6">Expert Movie Ratings</h1>
           
           {isLoading ? (
             <div className="text-center py-10">

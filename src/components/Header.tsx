@@ -37,7 +37,7 @@ export default function Header({ showAdminLink = true }: HeaderProps) {
         <nav className="relative">
           <div className="flex items-center space-x-4">
             <Link href="/movies" className="text-gray-700 hover:text-blue-600">
-              All Movies
+              Admin Ratings
             </Link>
 
             {isAuthenticated ? (
