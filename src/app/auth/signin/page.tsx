@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -51,8 +51,14 @@ export default function SignIn() {
         return;
       }
 
-      console.log("Sign-in successful, redirecting to /admin");
-      router.push("/admin");
+      // After successful sign-in, retrieve the session to check if user is admin
+      console.log("Sign-in successful, fetching user session");
+      
+      // We need to refresh the page to get the updated session with user data
+      // Then the app layout will handle redirect based on user role
+      console.log("Redirecting to homepage");
+      router.push("/");
+      
     } catch (error) {
       console.error("Authentication error:", error);
       setErrorMessage("An error occurred. Please try again.");
@@ -65,7 +71,7 @@ export default function SignIn() {
       <div className="max-w-md w-full p-8 bg-white rounded-lg shadow-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold">Movie Rater</h1>
-          <p className="text-gray-600 mt-2">Sign in to access admin features</p>
+          <p className="text-gray-600 mt-2">Sign in to access your account</p>
         </div>
 
         {errorMessage && (

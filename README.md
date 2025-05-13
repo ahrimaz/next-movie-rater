@@ -5,9 +5,16 @@ The aim of the project is to act as a simple website for rating movies.
 The site allows:
 - Admin ratings (displayed on the homepage)
 - User registration and user-specific ratings
-- Public viewing of all ratings
+- Public viewing of all admin ratings
 
 Each user's ratings are associated with their account and displayed on their own page.
+
+## Recent Updates
+
+- **Homepage Update**: Homepage now shows only the latest 3 admin movie ratings with a "View All" link
+- **User/Admin Separation**: Clear separation between admin ratings and user ratings
+- **Navigation Clarity**: Updated navigation labels to clearly distinguish between admin and user content
+- **API Enhancement**: Added limit parameter support to the movies API endpoint
 
 ## Project Structure
 
@@ -15,7 +22,7 @@ Each user's ratings are associated with their account and displayed on their own
 next-movie-rater/
 ├── src/
 │   ├── app/
-│   │   ├── page.tsx                  # Homepage - displays admin's latest ratings
+│   │   ├── page.tsx                  # Homepage - displays admin's 3 latest ratings
 │   │   ├── layout.tsx                # Root layout
 │   │   ├── admin/                    # Admin section (protected)
 │   │   │   ├── page.tsx              # Admin dashboard
@@ -26,15 +33,15 @@ next-movie-rater/
 │   │   │   ├── settings/page.tsx     # User account settings
 │   │   │   ├── add/page.tsx          # Add new movie rating (for user)
 │   │   │   └── edit/[id]/page.tsx    # Edit existing rating (for user)
-│   │   ├── movies/                   # Public movie ratings
-│   │   │   ├── page.tsx              # All movies list
+│   │   ├── movies/                   # Admin movie ratings
+│   │   │   ├── page.tsx              # All admin movies list
 │   │   │   └── [id]/page.tsx         # Single movie details
 │   │   ├── auth/                     # Authentication pages
 │   │   │   ├── signin/page.tsx       # Sign in page
 │   │   │   └── signup/page.tsx       # Sign up page
 │   │   └── api/                      # API routes
 │   │       ├── auth/[...nextauth]/route.ts  # Auth endpoints
-│   │       ├── movies/route.ts       # Movie data endpoints
+│   │       ├── movies/route.ts       # Movie data endpoints (with limit support)
 │   │       ├── users/route.ts        # User-related endpoints
 │   │       └── tmdb/                 # TMDB API integration
 │   │           ├── search/route.ts   # Search movies on TMDB
@@ -42,7 +49,7 @@ next-movie-rater/
 │   ├── components/                   # Reusable components
 │   │   ├── MovieCard.tsx             # Movie card component
 │   │   ├── RatingStars.tsx           # Star rating component
-│   │   ├── Header.tsx                # Site header
+│   │   ├── Header.tsx                # Site header with clearer navigation labels
 │   │   ├── UserMenu.tsx              # User dropdown menu
 │   │   ├── AuthForms.tsx             # Sign in/up forms
 │   │   └── Footer.tsx                # Site footer
@@ -94,7 +101,8 @@ model User {
 ## Core Features
 
 1. **Public**
-   - View all movie ratings
+   - View admin movie ratings (limited to 3 on homepage)
+   - View full list of admin ratings
    - View single movie details
    - Sort/filter movies by rating, date, etc.
    - Register for an account
@@ -110,6 +118,17 @@ model User {
    - Manage all ratings
    - Admin dashboard with statistics
    - Special admin privileges
+
+## API Reference
+
+### GET /api/movies
+Fetches movie ratings with various filter options:
+
+- `?userId={id}` - Filter movies by specific user ID
+- `?isAdmin=true` - Return only movies created by admin users
+- `?limit={number}` - Limit the number of results returned
+
+Example: `/api/movies?isAdmin=true&limit=3` fetches the 3 most recent admin ratings
 
 ## Implementation Plan
 
@@ -138,7 +157,8 @@ model User {
    - Add user-specific movie filtering in the database queries
 
 5. **Homepage Modification**
-   - Update homepage queries to only display admin ratings
+   - Update homepage queries to only display admin ratings (limited to 3)
+   - Add "View All" link to the full admin ratings page
    - Ensure proper filtering of movies by admin user ID
 
 6. **User Profile Implementation**
@@ -147,6 +167,7 @@ model User {
    - Add user information display
 
 7. **UI Component Updates**
+   - Update navigation labels to clearly distinguish admin vs user content
    - Create UserMenu component for the header
    - Add authentication status indicators
    - Update navigation to show appropriate links based on user role
@@ -162,7 +183,7 @@ model User {
    - Test user registration flow
    - Verify proper association of movies with users
    - Test authorization boundaries between users
-   - Ensure homepage only shows admin ratings
+   - Ensure homepage only shows latest admin ratings
    - Verify user profile pages display correct ratings
 
 10. **Deployment & Monitoring**
