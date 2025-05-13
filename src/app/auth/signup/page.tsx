@@ -5,12 +5,6 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-// Define a proper error type
-interface RegisterError {
-  message?: string;
-  [key: string]: unknown;
-}
-
 export default function SignUp() {
   const router = useRouter();
   const [name, setName] = useState("");
