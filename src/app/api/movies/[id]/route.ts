@@ -14,7 +14,16 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const { id } = await params;
     
     const movie = await prisma.movie.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            isAdmin: true
+          }
+        }
+      }
     });
     
     if (!movie) {

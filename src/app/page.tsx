@@ -40,7 +40,7 @@ export default function HomePage() {
       
       <main>
         <section className="mb-10">
-          <h1 className="text-3xl font-bold mb-6">Expert Movie Ratings</h1>
+          <h1 className="text-3xl font-bold mb-6">Eric's Movie Ratings</h1>
           
           {isLoading ? (
             <div className="text-center py-10">
@@ -75,7 +75,7 @@ export default function HomePage() {
                   href="/movies" 
                   className="inline-block text-blue-600 hover:text-blue-800 font-medium"
                 >
-                  View All Admin Ratings →
+                  View All Of Eric's Ratings →
                 </Link>
               </div>
             </>

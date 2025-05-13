@@ -6,8 +6,9 @@ The site allows:
 - Admin ratings (displayed on the homepage)
 - User registration and user-specific ratings
 - Public viewing of all admin ratings
+- Shareable links for user profiles and individual movie ratings
 
-Each user's ratings are associated with their account and displayed on their own page.
+Each user's ratings are associated with their account and displayed on their own page. Users can share their personal ratings via a shareable link.
 
 ## Recent Updates
 
@@ -15,6 +16,8 @@ Each user's ratings are associated with their account and displayed on their own
 - **User/Admin Separation**: Clear separation between admin ratings and user ratings
 - **Navigation Clarity**: Updated navigation labels to clearly distinguish between admin and user content
 - **API Enhancement**: Added limit parameter support to the movies API endpoint
+- **Shareable Ratings**: Users can now share their movie ratings via direct links to their profiles
+- **Social Sharing**: Added sharing functionality for individual movies and user profiles
 
 ## Project Structure
 
@@ -29,13 +32,15 @@ next-movie-rater/
 │   │   │   ├── add/page.tsx          # Add new movie rating
 │   │   │   └── edit/[id]/page.tsx    # Edit existing rating
 │   │   ├── user/                     # User-specific section
-│   │   │   ├── page.tsx              # User's ratings page
+│   │   │   ├── page.tsx              # User's ratings page (with sharing)
 │   │   │   ├── settings/page.tsx     # User account settings
 │   │   │   ├── add/page.tsx          # Add new movie rating (for user)
 │   │   │   └── edit/[id]/page.tsx    # Edit existing rating (for user)
+│   │   ├── profiles/                 # Public user profiles
+│   │   │   └── [userId]/page.tsx     # Public profile with shareable link
 │   │   ├── movies/                   # Admin movie ratings
 │   │   │   ├── page.tsx              # All admin movies list
-│   │   │   └── [id]/page.tsx         # Single movie details
+│   │   │   └── [id]/page.tsx         # Single movie details (with sharing)
 │   │   ├── auth/                     # Authentication pages
 │   │   │   ├── signin/page.tsx       # Sign in page
 │   │   │   └── signup/page.tsx       # Sign up page
@@ -43,6 +48,7 @@ next-movie-rater/
 │   │       ├── auth/[...nextauth]/route.ts  # Auth endpoints
 │   │       ├── movies/route.ts       # Movie data endpoints (with limit support)
 │   │       ├── users/route.ts        # User-related endpoints
+│   │       ├── users/[userId]/route.ts # Get public user profile
 │   │       └── tmdb/                 # TMDB API integration
 │   │           ├── search/route.ts   # Search movies on TMDB
 │   │           └── movie/[id]/route.ts # Get movie details from TMDB
@@ -51,6 +57,7 @@ next-movie-rater/
 │   │   ├── RatingStars.tsx           # Star rating component
 │   │   ├── Header.tsx                # Site header with clearer navigation labels
 │   │   ├── UserMenu.tsx              # User dropdown menu
+│   │   ├── ShareButton.tsx           # Reusable social sharing component
 │   │   ├── AuthForms.tsx             # Sign in/up forms
 │   │   └── Footer.tsx                # Site footer
 │   ├── lib/                          # Library code
@@ -106,6 +113,7 @@ model User {
    - View single movie details
    - Sort/filter movies by rating, date, etc.
    - Register for an account
+   - Browse user profiles via shareable links
 
 2. **Registered Users**
    - Sign in to personal account
@@ -113,6 +121,8 @@ model User {
    - Edit/delete own ratings
    - View personal ratings page
    - Search for movies using TMDB API
+   - Share profile via a unique URL
+   - Share individual movie ratings
 
 3. **Admin Only**
    - Manage all ratings
@@ -129,6 +139,30 @@ Fetches movie ratings with various filter options:
 - `?limit={number}` - Limit the number of results returned
 
 Example: `/api/movies?isAdmin=true&limit=3` fetches the 3 most recent admin ratings
+
+### GET /api/users/[userId]
+Fetches a user's public profile information:
+
+- Returns user's public data (name, id, admin status)
+- Does not include private information like email
+
+## Shareable Content
+
+The application supports sharing content through unique URLs:
+
+1. **User Profiles**: `/profiles/[userId]`
+   - Publicly viewable page showing all ratings by a specific user
+   - No authentication required to view
+
+2. **Individual Movies**: `/movies/[id]`
+   - Publicly viewable page showing details for a specific movie rating
+   - Shows who created the rating with a link to their profile
+   - No authentication required to view
+
+3. **Share Features**:
+   - Copy link functionality for manual sharing
+   - Uses Web Share API on supporting browsers
+   - Visual feedback when links are copied
 
 ## Implementation Plan
 
@@ -173,20 +207,29 @@ Example: `/api/movies?isAdmin=true&limit=3` fetches the 3 most recent admin rati
    - Update navigation to show appropriate links based on user role
    - Implement AuthForms component for sign-in/sign-up
 
-8. **Authorization & Security**
+8. **Add Shareable Content Features**
+   - Create public profiles page for viewing user ratings
+   - Update movie detail pages to include creator information
+   - Add share buttons to user and movie pages
+   - Implement copy-to-clipboard functionality
+   - Create reusable ShareButton component
+
+9. **Authorization & Security**
    - Update middleware to protect routes based on user roles
    - Implement proper error handling for unauthorized access
    - Add CSRF protection for forms
    - Ensure proper validation of user input
+   - Ensure sharing endpoints don't expose sensitive data
 
-9. **Testing**
-   - Test user registration flow
-   - Verify proper association of movies with users
-   - Test authorization boundaries between users
-   - Ensure homepage only shows latest admin ratings
-   - Verify user profile pages display correct ratings
+10. **Testing**
+    - Test user registration flow
+    - Verify proper association of movies with users
+    - Test authorization boundaries between users
+    - Ensure homepage only shows latest admin ratings
+    - Verify user profile pages display correct ratings
+    - Test sharing functionality across different devices
 
-10. **Deployment & Monitoring**
+11. **Deployment & Monitoring**
     - Update environment variables for production
     - Deploy updated application
     - Monitor for any authentication or database issues

@@ -7,16 +7,27 @@ import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import RatingStars from "@/components/RatingStars";
+import ShareButton from "@/components/ShareButton";
 import { Movie } from "@/types";
 import { notFound } from "next/navigation";
+
+// Extended movie type to include user info
+interface ExtendedMovie extends Movie {
+  user?: {
+    id: string;
+    name?: string;
+    isAdmin?: boolean;
+  };
+}
 
 export default function MoviePage() {
   const params = useParams();
   const id = params.id as string;
   
-  const [movie, setMovie] = useState<Partial<Movie> | null>(null);
+  const [movie, setMovie] = useState<Partial<ExtendedMovie> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [shareUrl, setShareUrl] = useState<string>("");
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -33,6 +44,7 @@ export default function MoviePage() {
         }
         
         setMovie(data.data);
+        setShareUrl(`${window.location.origin}/movies/${id}`);
         setError(null);
       } catch (err) {
         console.error(`Error fetching movie ID ${id}:`, err);
@@ -91,12 +103,16 @@ export default function MoviePage() {
       <Header />
 
       <main className="mb-8">
-        <Link 
-          href="/movies" 
-          className="inline-flex items-center mb-6 text-blue-600 hover:underline"
-        >
-          ← Back to all movies
-        </Link>
+        <div className="flex justify-between items-center mb-6">
+          <Link 
+            href="/movies" 
+            className="inline-flex items-center text-blue-600 hover:underline"
+          >
+            ← Back to all movies
+          </Link>
+          
+          <ShareButton url={shareUrl} title="Share This Rating" />
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Movie poster */}
@@ -126,6 +142,21 @@ export default function MoviePage() {
               <RatingStars rating={movie.rating || 0} size="lg" />
               <span className="ml-2 font-semibold">{movie.rating}/5</span>
             </div>
+            
+            {/* Rated by information with link to profile */}
+            {movie.user && (
+              <div className="mb-4 text-gray-600">
+                Rated by:{' '}
+                <Link href={`/profiles/${movie.user.id}`} className="text-blue-600 hover:underline">
+                  {movie.user.name || (movie.user.isAdmin ? 'Admin' : 'User')}
+                </Link>
+                {movie.user.isAdmin && (
+                  <span className="ml-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">
+                    Admin
+                  </span>
+                )}
+              </div>
+            )}
             
             <div className="mb-6 space-y-2">
               {movie.director && (

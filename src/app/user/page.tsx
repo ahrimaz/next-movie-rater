@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import MovieCard from "@/components/MovieCard";
 import Footer from "@/components/Footer";
+import ShareButton from "@/components/ShareButton";
 import { Movie } from "@/types";
 
 // Extended user type to include ID
@@ -22,6 +23,7 @@ export default function UserDashboard() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [shareUrl, setShareUrl] = useState<string>("");
   
   // Redirect if not authenticated
   useEffect(() => {
@@ -47,6 +49,9 @@ export default function UserDashboard() {
         }
         
         setMovies(data.data);
+        
+        // Set the share URL based on the user's ID
+        setShareUrl(`${window.location.origin}/profiles/${user.id}`);
       } catch (err) {
         console.error("Error fetching user movies:", err);
         setError("Failed to load your movies. Please try again later.");
@@ -82,12 +87,15 @@ export default function UserDashboard() {
         <section className="mb-10">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold">My Movie Ratings</h1>
-            <a 
-              href="/user/add" 
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-            >
-              Add New Rating
-            </a>
+            <div className="flex gap-2">
+              <ShareButton url={shareUrl} title="Share My Ratings" />
+              <a 
+                href="/user/add" 
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+              >
+                Add New Rating
+              </a>
+            </div>
           </div>
           
           {isLoading ? (
