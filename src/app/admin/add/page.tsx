@@ -20,6 +20,9 @@ export default function AddMoviePage() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -34,6 +37,67 @@ export default function AddMoviePage() {
       ...prev,
       rating
     }));
+  };
+  
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!searchQuery.trim()) return;
+    
+    try {
+      setIsSearching(true);
+      setError(null);
+      
+      const response = await fetch(`/api/tmdb/search?query=${encodeURIComponent(searchQuery)}`);
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || "Failed to search for movies");
+      }
+      
+      setSearchResults(data.results);
+    } catch (err) {
+      console.error("Error searching for movies:", err);
+      setError("Failed to search for movies. Please try again.");
+    } finally {
+      setIsSearching(false);
+    }
+  };
+  
+  const handleSelectMovie = async (movieId: number) => {
+    try {
+      setIsSearching(true);
+      setError(null);
+      
+      const response = await fetch(`/api/tmdb/movie/${movieId}`);
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || "Failed to get movie details");
+      }
+      
+      const movie = data.movie;
+      
+      setFormData(prev => ({
+        ...prev,
+        title: movie.title,
+        director: movie.director || '',
+        year: movie.release_year || prev.year,
+        poster: movie.poster_url || '',
+        // Keep the current rating and review as these are user-specific
+        rating: prev.rating,
+        review: prev.review
+      }));
+      
+      // Clear search results after selection
+      setSearchResults([]);
+      setSearchQuery('');
+    } catch (err) {
+      console.error("Error getting movie details:", err);
+      setError("Failed to get movie details. Please try again.");
+    } finally {
+      setIsSearching(false);
+    }
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,6 +150,60 @@ export default function AddMoviePage() {
             {error}
           </div>
         )}
+        
+        {/* TMDB Search Section */}
+        <div className="mb-8 max-w-2xl">
+          <h2 className="text-lg font-medium mb-2">Find a movie</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Search for a movie to automatically fill in details from TMDB.
+          </p>
+          
+          <form onSubmit={handleSearch} className="flex mb-4">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search for a movie..."
+              className="flex-grow p-2 border rounded-l focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <button 
+              type="submit" 
+              className="bg-blue-600 text-white px-4 py-2 rounded-r hover:bg-blue-700 transition disabled:opacity-50"
+              disabled={isSearching || !searchQuery.trim()}
+            >
+              {isSearching ? "Searching..." : "Search"}
+            </button>
+          </form>
+          
+          {searchResults.length > 0 && (
+            <div className="border rounded-md overflow-hidden mb-6">
+              <div className="text-sm font-medium bg-gray-100 p-2">
+                Search Results
+              </div>
+              <ul className="divide-y">
+                {searchResults.map((movie: any) => (
+                  <li key={movie.id} className="p-3 hover:bg-gray-50 cursor-pointer flex items-center" onClick={() => handleSelectMovie(movie.id)}>
+                    {movie.poster_path && (
+                      <div className="w-10 h-14 bg-gray-200 mr-3 flex-shrink-0 overflow-hidden rounded">
+                        <img 
+                          src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`} 
+                          alt={movie.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <div>
+                      <div className="font-medium">{movie.title}</div>
+                      <div className="text-sm text-gray-600">
+                        {movie.release_date ? new Date(movie.release_date).getFullYear() : 'Unknown year'}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
         
         <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
           {/* Title */}
@@ -150,6 +268,19 @@ export default function AddMoviePage() {
               placeholder="https://"
               className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
+            {formData.poster && (
+              <div className="mt-2">
+                <div className="text-xs text-gray-600 mb-1">Preview:</div>
+                <div className="w-20 h-28 bg-gray-200 overflow-hidden rounded">
+                  <img 
+                    src={formData.poster} 
+                    alt="Poster preview"
+                    className="w-full h-full object-cover"
+                    onError={(e) => (e.target as HTMLImageElement).src = 'https://via.placeholder.com/92x138?text=No+Image'}
+                  />
+                </div>
+              </div>
+            )}
           </div>
           
           {/* Rating */}

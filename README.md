@@ -26,7 +26,10 @@ next-movie-rater/
 │   │   │   └── [id]/page.tsx         # Single movie details
 │   │   └── api/                      # API routes
 │   │       ├── auth/[...nextauth]/route.ts  # Auth endpoints
-│   │       └── movies/route.ts       # Movie data endpoints
+│   │       ├── movies/route.ts       # Movie data endpoints
+│   │       └── tmdb/                 # TMDB API integration
+│   │           ├── search/route.ts   # Search movies on TMDB
+│   │           └── movie/[id]/route.ts # Get movie details from TMDB
 │   ├── components/                   # Reusable components
 │   │   ├── MovieCard.tsx             # Movie card component
 │   │   ├── RatingStars.tsx           # Star rating component
@@ -71,6 +74,7 @@ model User {
 - **Authentication**: NextAuth.js with email/password
 - **Styling**: TailwindCSS
 - **Deployment**: Vercel
+- **External API**: TMDB (The Movie Database) for movie information
 
 ## Core Features
 
@@ -84,6 +88,7 @@ model User {
    - Add new movie ratings
    - Edit existing ratings
    - Delete ratings
+   - Search for movies using TMDB API
 
 ## Implementation Plan
 
@@ -94,6 +99,7 @@ model User {
 5. Implement admin functionality
 6. Add sorting and filtering
 7. Polish UI/UX
+8. Integrate with TMDB API for movie data
 
 ## Required Dependencies
 
@@ -107,3 +113,18 @@ npm install next-auth
 # UI Components
 npm install react-icons
 ```
+
+## TMDB API Integration
+
+This project uses The Movie Database (TMDB) API to fetch movie information when adding new ratings. To use this feature:
+
+1. Sign up for a free account at [TMDB](https://www.themoviedb.org/)
+2. Go to your account settings and navigate to the API section
+3. Request an API key (choose "Developer" option)
+4. Create a `.env.local` file in the project root with:
+   ```
+   TMDB_API_KEY=your_api_key_here
+   ```
+5. Restart the development server
+
+The TMDB integration allows you to search for movies and automatically fill in details like title, director, release year, and poster image.
