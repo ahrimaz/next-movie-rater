@@ -1,5 +1,17 @@
 import { NextResponse } from "next/server";
 
+// Define interfaces for TMDB API responses
+interface TMDBCrewMember {
+  id: number;
+  name: string;
+  job: string;
+}
+
+interface TMDBCreditsResponse {
+  id: number;
+  crew: TMDBCrewMember[];
+}
+
 // This endpoint gets detailed information about a specific movie from TMDB
 export async function GET(
   request: Request,
@@ -44,12 +56,12 @@ export async function GET(
     }
     
     const movieData = await movieResponse.json();
-    const creditsData = await creditsResponse.json();
+    const creditsData: TMDBCreditsResponse = await creditsResponse.json();
     
     // Find director(s) from crew
     const directors = creditsData.crew
-      .filter((person: any) => person.job === 'Director')
-      .map((director: any) => director.name);
+      .filter((person: TMDBCrewMember) => person.job === 'Director')
+      .map((director: TMDBCrewMember) => director.name);
     
     const posterUrl = movieData.poster_path 
       ? `https://image.tmdb.org/t/p/w500${movieData.poster_path}`

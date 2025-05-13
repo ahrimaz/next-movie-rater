@@ -1,5 +1,22 @@
 import { NextResponse } from "next/server";
 
+// Define interface for TMDB search results
+interface TMDBSearchResult {
+  id: number;
+  title: string;
+  poster_path: string | null;
+  release_date: string | null;
+  overview: string;
+  vote_average: number;
+}
+
+interface TMDBSearchResponse {
+  page: number;
+  results: TMDBSearchResult[];
+  total_results: number;
+  total_pages: number;
+}
+
 // This endpoint searches for movies using TMDB API
 export async function GET(request: Request) {
   try {
@@ -32,7 +49,7 @@ export async function GET(request: Request) {
       throw new Error(`TMDB API error: ${tmdbResponse.status}`);
     }
     
-    const tmdbData = await tmdbResponse.json();
+    const tmdbData: TMDBSearchResponse = await tmdbResponse.json();
     
     return NextResponse.json({
       success: true,

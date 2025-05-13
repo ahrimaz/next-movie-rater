@@ -3,9 +3,29 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import RatingStars from "@/components/RatingStars";
+
+// Define types for TMDB movie results
+interface TMDBMovieResult {
+  id: number;
+  title: string;
+  poster_path: string | null;
+  release_date: string | null;
+}
+
+// Type for movie details returned from API
+interface TMDBMovieDetails {
+  id: number;
+  title: string;
+  director: string;
+  release_year: number | null;
+  poster_url: string | null;
+  overview: string;
+  runtime: number | null;
+}
 
 export default function AddMoviePage() {
   const router = useRouter();
@@ -21,8 +41,11 @@ export default function AddMoviePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<TMDBMovieResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  
+  // Add state for poster error handling
+  const [posterError, setPosterError] = useState(false);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -30,6 +53,11 @@ export default function AddMoviePage() {
       ...prev,
       [name]: name === 'year' ? parseInt(value) || '' : value
     }));
+    
+    // Reset poster error when the poster URL changes
+    if (name === 'poster') {
+      setPosterError(false);
+    }
   };
   
   const handleRatingChange = (rating: number) => {
@@ -76,7 +104,7 @@ export default function AddMoviePage() {
         throw new Error(data.error || "Failed to get movie details");
       }
       
-      const movie = data.movie;
+      const movie: TMDBMovieDetails = data.movie;
       
       setFormData(prev => ({
         ...prev,
@@ -88,6 +116,9 @@ export default function AddMoviePage() {
         rating: prev.rating,
         review: prev.review
       }));
+      
+      // Reset poster error when selecting a new movie
+      setPosterError(false);
       
       // Clear search results after selection
       setSearchResults([]);
@@ -128,6 +159,10 @@ export default function AddMoviePage() {
       setError("Failed to add movie. Please try again.");
       setIsSubmitting(false);
     }
+  };
+
+  const handlePosterError = () => {
+    setPosterError(true);
   };
 
   return (
@@ -181,14 +216,15 @@ export default function AddMoviePage() {
                 Search Results
               </div>
               <ul className="divide-y">
-                {searchResults.map((movie: any) => (
+                {searchResults.map((movie: TMDBMovieResult) => (
                   <li key={movie.id} className="p-3 hover:bg-gray-50 cursor-pointer flex items-center" onClick={() => handleSelectMovie(movie.id)}>
                     {movie.poster_path && (
-                      <div className="w-10 h-14 bg-gray-200 mr-3 flex-shrink-0 overflow-hidden rounded">
-                        <img 
+                      <div className="w-10 h-14 bg-gray-200 mr-3 flex-shrink-0 overflow-hidden rounded relative">
+                        <Image 
                           src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`} 
                           alt={movie.title}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                       </div>
                     )}
@@ -271,13 +307,20 @@ export default function AddMoviePage() {
             {formData.poster && (
               <div className="mt-2">
                 <div className="text-xs text-gray-600 mb-1">Preview:</div>
-                <div className="w-20 h-28 bg-gray-200 overflow-hidden rounded">
-                  <img 
-                    src={formData.poster} 
-                    alt="Poster preview"
-                    className="w-full h-full object-cover"
-                    onError={(e) => (e.target as HTMLImageElement).src = 'https://via.placeholder.com/92x138?text=No+Image'}
-                  />
+                <div className="w-20 h-28 bg-gray-200 overflow-hidden rounded relative">
+                  {posterError ? (
+                    <div className="w-full h-full flex items-center justify-center text-xs text-gray-500 p-1 text-center">
+                      Invalid image
+                    </div>
+                  ) : (
+                    <Image 
+                      src={formData.poster} 
+                      alt="Poster preview"
+                      fill
+                      className="object-cover"
+                      onError={handlePosterError}
+                    />
+                  )}
                 </div>
               </div>
             )}
