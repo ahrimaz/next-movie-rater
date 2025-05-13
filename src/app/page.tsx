@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import Header from "@/components/Header";
 import MovieCard from "@/components/MovieCard";
 import Footer from "@/components/Footer";
@@ -14,7 +15,7 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchAdminMovies() {
       try {
-        const response = await fetch(`/api/movies?isAdmin=true`);
+        const response = await fetch(`/api/movies?isAdmin=true&limit=3`);
         const data = await response.json();
         
         if (!data.success) {
@@ -55,19 +56,29 @@ export default function HomePage() {
               <p className="text-gray-500">No movie ratings yet.</p>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {movies.map((movie) => (
-                <MovieCard 
-                  key={movie.id}
-                  id={movie.id}
-                  title={movie.title}
-                  director={movie.director}
-                  year={movie.year}
-                  poster={movie.poster}
-                  rating={movie.rating}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {movies.map((movie) => (
+                  <MovieCard 
+                    key={movie.id}
+                    id={movie.id}
+                    title={movie.title}
+                    director={movie.director}
+                    year={movie.year}
+                    poster={movie.poster}
+                    rating={movie.rating}
+                  />
+                ))}
+              </div>
+              <div className="text-center mt-6">
+                <Link 
+                  href="/movies" 
+                  className="inline-block text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  View All Admin Ratings →
+                </Link>
+              </div>
+            </>
           )}
         </section>
       </main>

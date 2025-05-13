@@ -23,6 +23,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
     const isAdmin = searchParams.get("isAdmin") === "true";
+    const limitParam = searchParams.get("limit");
+    const limit = limitParam ? parseInt(limitParam) : undefined;
     
     let movies;
     
@@ -43,7 +45,8 @@ export async function GET(request: Request) {
               isAdmin: true
             }
           }
-        }
+        },
+        ...(limit && { take: limit })
       });
     } 
     // Only show admin movies if isAdmin flag is set
@@ -73,7 +76,8 @@ export async function GET(request: Request) {
               isAdmin: true
             }
           }
-        }
+        },
+        ...(limit && { take: limit })
       });
     }
     // Otherwise, get all movies
@@ -90,7 +94,8 @@ export async function GET(request: Request) {
               isAdmin: true
             }
           }
-        }
+        },
+        ...(limit && { take: limit })
       });
     }
     
