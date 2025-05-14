@@ -133,13 +133,6 @@ export default function UserDashboard() {
             </div>
           ) : (
             <>
-              <div className="mb-6 p-4 bg-blue-50 rounded-md border border-blue-100">
-                <h3 className="font-medium text-blue-800 mb-1">Managing Your Ratings</h3>
-                <p className="text-sm text-blue-700">
-                  You can edit or delete your ratings using the buttons at the bottom of each movie card. 
-                  These options are only available for movies that you&apos;ve rated.
-                </p>
-              </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {movies.map((movie) => (
                   <MovieCard 
