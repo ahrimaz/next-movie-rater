@@ -23,6 +23,8 @@ model Movie {
   updatedAt   DateTime @updatedAt
   userId      String
   user        User     @relation(fields: [userId], references: [id])
+  isFavorite  Boolean  @default(false)
+  isPublic    Boolean  @default(true)
 }
 
 model User {
@@ -34,4 +36,11 @@ model User {
   isAdmin       Boolean   @default(false)
   movies        Movie[]
   createdAt     DateTime  @default(now())
+  
+  // Profile fields
+  bio           String?
+  profileImage  String?   // URL to profile image
+  themeColor    String?   // User's preferred theme color (hex code)
+  isProfilePublic Boolean @default(true) // Whether profile is public or private
+  favoriteGenres String[]  // Array of favorite genres
 } 

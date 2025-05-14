@@ -245,6 +245,46 @@ The application uses NextAuth.js for authentication with custom registration:
    - Users can share their profile using their username in the URL
    - Example: `/profiles/john-doe` instead of `/profiles/clk2x9f340000356etsgaklj2`
 
+## Enhanced User Profiles
+
+The application includes robust user profiles that showcase each user's movie rating activity and preferences:
+
+1. **Core Profile Features**:
+   - Personalized profile page accessible via username-based URL
+   - Display of user's personal information (name, join date)
+   - Complete grid of all movies rated by the user
+   - Sorting and filtering options for the user's ratings
+   - Statistics about rating patterns (average rating, total movies rated)
+   - Visual rating distribution chart
+   - Recent activity timeline
+
+2. **Customization Options**:
+   - Customizable "About Me" bio section
+   - Profile picture upload
+   - Theme color preferences
+   - Privacy settings for controlling visibility of ratings
+   - Ability to highlight favorite movies on profile
+
+3. **Integration with Community**:
+   - Links to user profiles from any movie they've rated
+   - User activity displayed in community section
+   - Shareable profile links with preview cards for social media
+
+4. **Implementation Details**:
+   - Extended User model with profile-specific fields
+   - Dedicated profile management section in user settings
+   - Optimized queries for fast profile loading
+   - Responsive design for mobile and desktop viewing
+   - Progressive image loading for movie grid
+
+5. **Privacy Controls**:
+   - Users can choose to make their entire profile public or private
+   - Options to hide specific ratings from public view
+   - Control over which personal details are displayed
+   - Activity privacy settings
+
+This enhanced profile system creates a social dimension to the movie rating experience, allowing users to express their movie preferences while connecting with other film enthusiasts.
+
 ## Implementation Plan
 
 1. **Update Database Schema**
@@ -284,6 +324,17 @@ The application uses NextAuth.js for authentication with custom registration:
    - Create a new page to view all community ratings at /community-ratings
    - Implement visual separation between admin and community sections
    - Include user attribution for each community rating
+
+5c. **Enhanced User Profiles**
+   - Extend the User model with additional profile fields
+   - Create profile management UI in user settings
+   - Implement profile picture upload with image processing
+   - Develop statistics calculation for rating patterns
+   - Create data visualization components for rating distribution
+   - Build responsive profile page with tabbed sections
+   - Implement privacy controls for profile visibility
+   - Add sorting and filtering capabilities for user's ratings grid
+   - Optimize queries for profile data loading performance
 
 6. **User Profile Implementation**
    - Create user profile page that displays only that user's ratings

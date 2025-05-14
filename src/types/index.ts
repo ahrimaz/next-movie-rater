@@ -11,6 +11,8 @@ export type Movie = {
   updatedAt: Date;
   userId?: string;
   user?: User;
+  isFavorite?: boolean;
+  isPublic?: boolean;
 };
 
 // User related types
@@ -20,6 +22,14 @@ export type User = {
   username?: string;
   name?: string;
   isAdmin: boolean;
+  createdAt?: Date;
+  
+  // Profile fields
+  bio?: string;
+  profileImage?: string;
+  themeColor?: string;
+  isProfilePublic?: boolean;
+  favoriteGenres?: string[];
 };
 
 // API response types

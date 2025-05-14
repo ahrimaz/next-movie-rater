@@ -32,8 +32,8 @@ export const MovieCard = ({
 }: MovieProps) => {
   return (
     <div className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition">
-      <Link href={`/movies/${id}`} className="block">
-        <div className="aspect-[2/3] bg-gray-200 relative">
+      <div className="aspect-[2/3] bg-gray-200 relative">
+        <Link href={`/movies/${id}`} className="block w-full h-full">
           {poster ? (
             <div className="relative w-full h-full">
               <Image 
@@ -49,36 +49,38 @@ export const MovieCard = ({
               No poster
             </div>
           )}
-        </div>
+        </Link>
+      </div>
+      
+      <div className="p-4">
+        <Link href={`/movies/${id}`}>
+          <h3 className="text-xl font-semibold hover:text-blue-600 transition-colors">{title}</h3>
+        </Link>
         
-        <div className="p-4">
-          <h3 className="text-xl font-semibold">{title}</h3>
-          
-          {(director || year) && (
-            <p className="text-gray-600">
-              {director && director}
-              {director && year && ', '}
-              {year && year}
-            </p>
-          )}
-          
-          <div className="mt-3">
-            <RatingStars rating={rating} />
-          </div>
-
-          {showUser && user && (
-            <div className="mt-3 text-sm text-gray-600">
-              Rated by: {' '}
-              <Link 
-                href={`/profiles/${user.username || user.id}`}
-                className="text-blue-600 hover:underline"
-              >
-                {user.name || user.username || 'User'}
-              </Link>
-            </div>
-          )}
+        {(director || year) && (
+          <p className="text-gray-600">
+            {director && director}
+            {director && year && ', '}
+            {year && year}
+          </p>
+        )}
+        
+        <div className="mt-3">
+          <RatingStars rating={rating} />
         </div>
-      </Link>
+
+        {showUser && user && (
+          <div className="mt-3 text-sm text-gray-600">
+            Rated by: {' '}
+            <Link 
+              href={`/profiles/${user.username || user.id}`}
+              className="text-blue-600 hover:underline"
+            >
+              {user.name || user.username || 'User'}
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
