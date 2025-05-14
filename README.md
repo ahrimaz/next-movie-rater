@@ -13,6 +13,8 @@ Each user's ratings are associated with their account and displayed on their own
 
 ## Recent Updates
 
+- **Username from Name**: Users' names are now automatically used as their profile username
+- **User-friendly URLs**: Spaces in names are converted to hyphens in URLs (e.g., "John Doe" becomes "john-doe")
 - **Homepage Update**: Homepage now shows only the latest 3 admin movie ratings with a "View All" link
 - **User/Admin Separation**: Clear separation between admin ratings and user ratings
 - **Navigation Clarity**: Updated navigation labels to clearly distinguish between admin and user content
@@ -192,10 +194,12 @@ The application includes a username system for more user-friendly URLs:
 1. **Username Format**:
    - Alphanumeric characters, underscores, hyphens, and periods
    - 3-20 characters in length
-   - Automatically generated from user's name or email
+   - Automatically created from the user's name during registration
+   - Spaces in names are converted to hyphens (e.g., "John Doe" becomes "john-doe")
    - Unique across all users
 
 2. **Username Generation**:
+   - Created from the name field during user registration
    - Automatic for new users
    - Admin tool to generate for existing users
    - Handles duplicates by adding numeric suffixes
@@ -205,6 +209,33 @@ The application includes a username system for more user-friendly URLs:
    - All user profile URLs support either username or ID
    - Username-based URLs are preferred when available
    - Backwards compatible with ID-based URLs
+
+4. **User Registration**:
+   - The name field during signup is used as the base for the user's profile URL
+   - Users are informed that their name will be used for their profile URL
+   - Validation ensures names can be converted to valid usernames
+   - Minimum of 3 characters with only allowed special characters (hyphens, underscores, periods)
+
+## Authentication and User Registration
+
+The application uses NextAuth.js for authentication with custom registration:
+
+1. **User Registration**:
+   - Users provide their name, email, and password
+   - The name field is used to generate their public username for profile URLs
+   - Names are automatically converted to URL-friendly format:
+     - Spaces are replaced with hyphens
+     - Special characters are removed
+     - Made lowercase for consistency
+   - Uniqueness is guaranteed by adding a numeric suffix if needed
+
+2. **Login**:
+   - Users can login with their email and password
+   - After login, they're directed to their personal dashboard
+
+3. **Profile Sharing**:
+   - Users can share their profile using their username in the URL
+   - Example: `/profiles/john-doe` instead of `/profiles/clk2x9f340000356etsgaklj2`
 
 ## Implementation Plan
 
