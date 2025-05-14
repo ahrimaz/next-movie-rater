@@ -13,13 +13,18 @@ interface ExtendedUser {
   isAdmin?: boolean;
   name?: string | null;
   email?: string | null;
+  id?: string;
+  username?: string;
 }
 
 export default function Header({ showAdminLink = true }: HeaderProps) {
   const { data: session, status } = useSession();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isAdmin = (session?.user as ExtendedUser)?.isAdmin;
+  
+  const user = session?.user as ExtendedUser;
+  const isAdmin = user?.isAdmin;
   const isAuthenticated = status === "authenticated";
+  const userProfilePath = user?.username ? `/profiles/${user.username}` : user?.id ? `/profiles/${user.id}` : "#";
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -38,6 +43,10 @@ export default function Header({ showAdminLink = true }: HeaderProps) {
           <div className="flex items-center space-x-4">
             <Link href="/movies" className="text-gray-700 hover:text-blue-600">
               Admin Ratings
+            </Link>
+            
+            <Link href="/community-ratings" className="text-gray-700 hover:text-blue-600">
+              Community Ratings
             </Link>
 
             {isAuthenticated ? (
@@ -72,6 +81,30 @@ export default function Header({ showAdminLink = true }: HeaderProps) {
                 
                 {isMenuOpen && (
                   <div className="absolute right-0 mt-2 top-full w-48 bg-white rounded-md shadow-lg z-10 py-1">
+                    <Link
+                      href={userProfilePath}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      View My Profile
+                    </Link>
+                    
+                    <Link
+                      href="/user/settings/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Edit Profile
+                    </Link>
+                    
+                    <Link
+                      href="/user/settings"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Account Settings
+                    </Link>
+                    
                     {isAdmin ? (
                       <Link
                         href="/admin/add"
