@@ -29,6 +29,21 @@ export default function SignUp() {
       return;
     }
 
+    // Validate name format if provided
+    if (name) {
+      // Name should be at least 3 characters and contain no invalid special characters
+      if (name.length < 3) {
+        setErrorMessage("Name must be at least 3 characters");
+        return;
+      }
+      
+      const namePattern = /^[a-zA-Z0-9_\-\. ]+$/;
+      if (!namePattern.test(name)) {
+        setErrorMessage("Name can only contain letters, numbers, spaces, and characters: _ - .");
+        return;
+      }
+    }
+
     setIsLoading(true);
 
     try {
@@ -91,7 +106,7 @@ export default function SignUp() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Username
+              Name/Username
             </label>
             <input
               id="name"
@@ -101,6 +116,9 @@ export default function SignUp() {
               className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             />
+            <p className="text-xs text-gray-500 mt-1">
+              This will be used for your profile URL (e.g., /profiles/yourname)
+            </p>
           </div>
           
           <div>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcrypt";
+import { generateUsername } from "@/lib/username";
 
 const prisma = new PrismaClient();
 
@@ -29,6 +30,9 @@ export async function POST(request: Request) {
       );
     }
 
+    // Generate a username from the name
+    const username = await generateUsername(name, email);
+
     // Hash the password
     const passwordHash = await hash(password, 12);
 
@@ -37,6 +41,7 @@ export async function POST(request: Request) {
       data: {
         email,
         name: name || null,
+        username, // Add the generated username
         passwordHash,
         isAdmin: false, // Ensure new users are not admins
       },
@@ -44,6 +49,7 @@ export async function POST(request: Request) {
         id: true,
         email: true,
         name: true,
+        username: true, // Include username in the response
         isAdmin: true,
         createdAt: true,
       }
@@ -56,6 +62,7 @@ export async function POST(request: Request) {
           id: user.id,
           email: user.email,
           name: user.name,
+          username: user.username,
           isAdmin: user.isAdmin,
           createdAt: user.createdAt
         } 

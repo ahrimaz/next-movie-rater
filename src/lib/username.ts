@@ -6,11 +6,14 @@ export async function generateUsername(name: string | null, email: string): Prom
   let baseUsername = '';
   
   if (name && name.trim().length > 0) {
-    // Use the name, removing spaces and special characters
-    baseUsername = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    // Use the name, keeping alphanumeric chars, hyphens, underscores, and periods
+    // Convert spaces to hyphens for readability
+    baseUsername = name.toLowerCase()
+      .replace(/ /g, '-')
+      .replace(/[^a-z0-9_\-\.]/g, '');
   } else {
     // Use the part of the email before @
-    baseUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+    baseUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9_\-\.]/g, '');
   }
   
   // Make sure it's at least 3 characters

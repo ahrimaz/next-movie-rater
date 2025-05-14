@@ -7,8 +7,9 @@ The site allows:
 - User registration and user-specific ratings
 - Public viewing of all admin ratings
 - Shareable links for user profiles and individual movie ratings
+- User-friendly URLs with usernames instead of IDs
 
-Each user's ratings are associated with their account and displayed on their own page. Users can share their personal ratings via a shareable link.
+Each user's ratings are associated with their account and displayed on their own page. Users can share their personal ratings via a shareable link using their username instead of a complex ID.
 
 ## Recent Updates
 
@@ -18,6 +19,9 @@ Each user's ratings are associated with their account and displayed on their own
 - **API Enhancement**: Added limit parameter support to the movies API endpoint
 - **Shareable Ratings**: Users can now share their movie ratings via direct links to their profiles
 - **Social Sharing**: Added sharing functionality for individual movies and user profiles
+- **Username Support**: Added usernames for more user-friendly profile URLs
+- **Simplified Sharing**: Updated share button to copy links directly to clipboard
+- **Admin Tools**: Added username generation tool for administrators
 
 ## Project Structure
 
@@ -30,6 +34,7 @@ next-movie-rater/
 │   │   ├── admin/                    # Admin section (protected)
 │   │   │   ├── page.tsx              # Admin dashboard
 │   │   │   ├── add/page.tsx          # Add new movie rating
+│   │   │   ├── generate-usernames/page.tsx # Admin tool to generate usernames
 │   │   │   └── edit/[id]/page.tsx    # Edit existing rating
 │   │   ├── user/                     # User-specific section
 │   │   │   ├── page.tsx              # User's ratings page (with sharing)
@@ -37,7 +42,7 @@ next-movie-rater/
 │   │   │   ├── add/page.tsx          # Add new movie rating (for user)
 │   │   │   └── edit/[id]/page.tsx    # Edit existing rating (for user)
 │   │   ├── profiles/                 # Public user profiles
-│   │   │   └── [userId]/page.tsx     # Public profile with shareable link
+│   │   │   └── [userId]/page.tsx     # Public profile with shareable link (supports username or ID)
 │   │   ├── movies/                   # Admin movie ratings
 │   │   │   ├── page.tsx              # All admin movies list
 │   │   │   └── [id]/page.tsx         # Single movie details (with sharing)
@@ -48,7 +53,8 @@ next-movie-rater/
 │   │       ├── auth/[...nextauth]/route.ts  # Auth endpoints
 │   │       ├── movies/route.ts       # Movie data endpoints (with limit support)
 │   │       ├── users/route.ts        # User-related endpoints
-│   │       ├── users/[userId]/route.ts # Get public user profile
+│   │       ├── users/[userId]/route.ts # Get public user profile by ID or username
+│   │       ├── generate-usernames/route.ts # Generate usernames for users
 │   │       └── tmdb/                 # TMDB API integration
 │   │           ├── search/route.ts   # Search movies on TMDB
 │   │           └── movie/[id]/route.ts # Get movie details from TMDB
@@ -57,12 +63,13 @@ next-movie-rater/
 │   │   ├── RatingStars.tsx           # Star rating component
 │   │   ├── Header.tsx                # Site header with clearer navigation labels
 │   │   ├── UserMenu.tsx              # User dropdown menu
-│   │   ├── ShareButton.tsx           # Reusable social sharing component
+│   │   ├── ShareButton.tsx           # Reusable clipboard sharing component
 │   │   ├── AuthForms.tsx             # Sign in/up forms
 │   │   └── Footer.tsx                # Site footer
 │   ├── lib/                          # Library code
 │   │   ├── db.ts                     # Database client
-│   │   └── auth.ts                   # Authentication utilities
+│   │   ├── auth.ts                   # Authentication utilities
+│   │   └── username.ts               # Username generation and lookup utilities
 │   └── types/                        # TypeScript type definitions
 │       └── index.ts                  # Shared types
 └── prisma/                           # Prisma ORM
@@ -87,12 +94,14 @@ model Movie {
 }
 
 model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  name        String?
-  isAdmin     Boolean  @default(false)
-  movies      Movie[]  // Relation to user's movie ratings
-  createdAt   DateTime @default(now())
+  id            String    @id @default(cuid())
+  email         String    @unique
+  username      String?   @unique   // Username for profile URLs
+  name          String?
+  passwordHash  String?   // Store hashed passwords
+  isAdmin       Boolean   @default(false)
+  movies        Movie[]   // Relation to user's movie ratings
+  createdAt     DateTime  @default(now())
 }
 ```
 
@@ -113,7 +122,7 @@ model User {
    - View single movie details
    - Sort/filter movies by rating, date, etc.
    - Register for an account
-   - Browse user profiles via shareable links
+   - Browse user profiles via shareable username-based links
 
 2. **Registered Users**
    - Sign in to personal account
@@ -121,12 +130,13 @@ model User {
    - Edit/delete own ratings
    - View personal ratings page
    - Search for movies using TMDB API
-   - Share profile via a unique URL
+   - Share profile via a username-based URL
    - Share individual movie ratings
 
 3. **Admin Only**
    - Manage all ratings
    - Admin dashboard with statistics
+   - Generate usernames for all users
    - Special admin privileges
 
 ## API Reference
@@ -143,16 +153,27 @@ Example: `/api/movies?isAdmin=true&limit=3` fetches the 3 most recent admin rati
 ### GET /api/users/[userId]
 Fetches a user's public profile information:
 
-- Returns user's public data (name, id, admin status)
+- Takes either a username or user ID to identify the user
+- Returns user's public data (name, id, username, admin status)
 - Does not include private information like email
+
+### POST /api/generate-usernames
+Admin-only endpoint to generate usernames for all users:
+
+- Generates usernames for all users who don't have one
+- Derives username from user's name or email
+- Ensures uniqueness by adding numeric suffixes if needed
 
 ## Shareable Content
 
 The application supports sharing content through unique URLs:
 
-1. **User Profiles**: `/profiles/[userId]`
+1. **User Profiles**: `/profiles/[usernameOrId]`
+   - Uses human-readable usernames in URLs when available (e.g., `/profiles/moviefan1`)
+   - Falls back to user ID if no username is set
    - Publicly viewable page showing all ratings by a specific user
    - No authentication required to view
+   - Displays username with @ symbol
 
 2. **Individual Movies**: `/movies/[id]`
    - Publicly viewable page showing details for a specific movie rating
@@ -160,15 +181,37 @@ The application supports sharing content through unique URLs:
    - No authentication required to view
 
 3. **Share Features**:
-   - Copy link functionality for manual sharing
-   - Uses Web Share API on supporting browsers
+   - One-click copy to clipboard functionality
    - Visual feedback when links are copied
+   - Simple, intuitive interface
+
+## Username System
+
+The application includes a username system for more user-friendly URLs:
+
+1. **Username Format**:
+   - Alphanumeric characters, underscores, hyphens, and periods
+   - 3-20 characters in length
+   - Automatically generated from user's name or email
+   - Unique across all users
+
+2. **Username Generation**:
+   - Automatic for new users
+   - Admin tool to generate for existing users
+   - Handles duplicates by adding numeric suffixes
+   - Converts spaces and special characters appropriately
+
+3. **URL Support**:
+   - All user profile URLs support either username or ID
+   - Username-based URLs are preferred when available
+   - Backwards compatible with ID-based URLs
 
 ## Implementation Plan
 
 1. **Update Database Schema**
    - Modify the Movie model to include a relation to the User model
    - Add a movies relation field to the User model
+   - Add a username field to the User model
    - Run migration to update the database structure
    - Update existing movie records to associate with the admin user
 
@@ -214,22 +257,30 @@ The application supports sharing content through unique URLs:
    - Implement copy-to-clipboard functionality
    - Create reusable ShareButton component
 
-9. **Authorization & Security**
-   - Update middleware to protect routes based on user roles
-   - Implement proper error handling for unauthorized access
-   - Add CSRF protection for forms
-   - Ensure proper validation of user input
-   - Ensure sharing endpoints don't expose sensitive data
+9. **Username System Implementation**
+   - Add username field to User model
+   - Create username generation utilities
+   - Update profile URLs to use usernames
+   - Ensure URL compatibility with both usernames and IDs
+   - Create admin tool for generating usernames
 
-10. **Testing**
+10. **Authorization & Security**
+    - Update middleware to protect routes based on user roles
+    - Implement proper error handling for unauthorized access
+    - Add CSRF protection for forms
+    - Ensure proper validation of user input
+    - Ensure sharing endpoints don't expose sensitive data
+
+11. **Testing**
     - Test user registration flow
     - Verify proper association of movies with users
     - Test authorization boundaries between users
     - Ensure homepage only shows latest admin ratings
     - Verify user profile pages display correct ratings
     - Test sharing functionality across different devices
+    - Verify username generation and URL handling
 
-11. **Deployment & Monitoring**
+12. **Deployment & Monitoring**
     - Update environment variables for production
     - Deploy updated application
     - Monitor for any authentication or database issues
@@ -262,3 +313,14 @@ This project uses The Movie Database (TMDB) API to fetch movie information when 
 5. Restart the development server
 
 The TMDB integration allows you to search for movies and automatically fill in details like title, director, release year, and poster image.
+
+## Username Setup for Existing Users
+
+If you have existing users in your database, you'll need to generate usernames for them:
+
+1. Log in as an admin user
+2. Navigate to `/admin/generate-usernames`
+3. Click the "Generate Usernames" button
+4. All users will receive automatically generated usernames based on their name or email
+
+After generating usernames, all profile share links will use the new username format.
