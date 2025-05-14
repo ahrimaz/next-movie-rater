@@ -9,11 +9,13 @@ The site allows:
 - Shareable links for user profiles and individual movie ratings
 - User-friendly URLs with usernames instead of IDs
 - Community ratings display on homepage
+- Edit and delete functionality for user movie ratings
 
 Each user's ratings are associated with their account and displayed on their own page. Users can share their personal ratings via a shareable link using their username instead of a complex ID.
 
 ## Recent Updates
 
+- **Edit and Delete User Ratings**: Implemented functionality for users to edit and delete their own movie ratings
 - **Enhanced User Profiles**: Implemented complete user profile system with customizable bios, profile images, theme colors, and privacy settings
 - **Profile Management**: Added full profile management UI for users to control their profile information
 - **Rating Statistics**: Added visual charts for rating distribution and statistics
@@ -138,7 +140,8 @@ model User {
 2. **Registered Users**
    - Sign in to personal account
    - Add new movie ratings
-   - Edit/delete own ratings
+   - Edit and delete own movie ratings
+   - Manage personal movie collection
    - View personal ratings page
    - Search for movies using TMDB API
    - Share profile via a username-based URL
@@ -169,6 +172,20 @@ Fetches a user's public profile information:
 - Takes either a username or user ID to identify the user
 - Returns user's public data (name, id, username, admin status)
 - Does not include private information like email
+
+### PUT /api/movies/[id]
+Updates an existing movie rating:
+
+- Requires authentication
+- Validates user owns the movie being edited
+- Returns updated movie data or error response
+
+### DELETE /api/movies/[id]
+Deletes a movie rating:
+
+- Requires authentication
+- Validates user owns the movie being deleted
+- Returns success status or error response
 
 ### POST /api/generate-usernames
 Admin-only endpoint to generate usernames for all users:
@@ -385,17 +402,28 @@ This enhanced profile system creates a social dimension to the movie rating expe
     - Resolved linting errors across the codebase
     - Improved responsive layout on mobile devices
 
-13. **Testing**
+13. **Edit and Delete User Ratings** ✓
+    - Created API routes for updating and deleting user movie ratings
+    - Implemented server-side ownership verification middleware
+    - Added edit page with pre-populated form for existing movie data
+    - Created confirmation modal for deletion operations
+    - Updated MovieCard component to include edit/delete buttons for owners
+    - Added success/error notifications for user feedback
+    - Implemented both client and server-side authorization checks
+    - Added API documentation for the new endpoints
+
+14. **Testing**
     - Test user registration flow
     - Verify proper association of movies with users
     - Test authorization boundaries between users
+    - Test edit and delete functionality for user ratings
     - Ensure homepage only shows latest admin ratings
     - Verify user profile pages display correct ratings
     - Test sharing functionality across different devices
     - Verify username generation and URL handling
     - Test navigation flows for accessing and editing profiles
 
-14. **Deployment & Monitoring**
+15. **Deployment & Monitoring**
     - Update environment variables for production
     - Deploy updated application
     - Monitor for any authentication or database issues
@@ -486,3 +514,60 @@ The navigation system has been updated to provide clearer access to user profile
    - Added Community Ratings to the main navigation bar
 
 These enhancements improve the overall user experience by providing clear, intuitive navigation to view and edit user profiles, making it easier for users to manage their presence on the platform.
+
+## Edit and Delete User Movie Ratings
+
+The application includes functionality for users to manage their movie ratings:
+
+### Edit Functionality
+
+1. **User Interface**:
+   - Edit buttons appear on movie cards that belong to the current user
+   - Edit page pre-populated with existing movie data
+   - Same form layout as add movie page for consistency
+   - Real-time validation with error messages
+
+2. **Implementation Details**:
+   - Protected `/user/edit/[id]` route for accessing the edit form
+   - PUT method in `/api/movies/[id]` endpoint
+   - Server-side verification to ensure users can only edit their own ratings
+   - Optimistic UI updates for instant feedback
+
+3. **User Experience**:
+   - Success notifications after successful edits
+   - Error handling with user-friendly messages
+   - Redirect to user's ratings page after successful edit
+
+### Delete Functionality
+
+1. **User Interface**:
+   - Delete buttons appear on movie cards that belong to the current user
+   - Confirmation modal to prevent accidental deletions
+   - Visual feedback during and after deletion process
+
+2. **Implementation Details**:
+   - DELETE method in `/api/movies/[id]` endpoint
+   - Server-side ownership verification before deletion
+   - Cascade deletion of related data
+   - Proper error handling and status codes
+
+3. **User Experience**:
+   - Success notifications after successful deletion
+   - Immediate removal from UI after confirmation
+   - Protection against accidental deletions
+
+### Security Considerations
+
+1. **Authorization**:
+   - Multiple layers of protection for edit/delete operations
+   - Client-side conditional rendering of edit/delete buttons
+   - Server-side middleware to verify ownership
+   - Proper HTTP status codes for unauthorized attempts
+
+2. **Data Protection**:
+   - Validation to prevent malformed data
+   - Rate limiting to prevent abuse
+   - Audit logging for sensitive operations
+   - CSRF protection for all forms
+
+These features enhance the user experience by providing complete control over their movie ratings while maintaining security and data integrity.

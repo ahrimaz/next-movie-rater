@@ -1,6 +1,12 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import RatingStars from './RatingStars';
+import Link from 'next/link';import Image from 'next/image';import RatingStars from './RatingStars';import { useState } from 'react';import { useSession } from 'next-auth/react';
+
+// Define a type for the session user
+interface SessionUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
 
 type User = {
   id: string;
@@ -30,8 +36,63 @@ export const MovieCard = ({
   user, 
   showUser = false 
 }: MovieProps) => {
+  const { data: session } = useSession();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const isOwner = session?.user && user && (session.user as SessionUser).id === user.id;
+
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+      
+      const response = await fetch(`/api/movies/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete movie');
+      }
+      
+      // Refresh the page to show updated data
+      window.location.reload();
+    } catch (err) {
+      console.error('Error deleting movie:', err);
+      setError('Failed to delete movie. Please try again.');
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
   return (
-    <div className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition">
+    <div className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition relative">
+      {/* Edit/Delete buttons for owner */}
+      {isOwner && (
+        <div className="absolute top-2 right-2 z-10 flex space-x-1">
+          <Link
+            href={`/user/edit/${id}`}
+            className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-md transition"
+            title="Edit rating"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+              <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" />
+            </svg>
+          </Link>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-md transition"
+            title="Delete rating"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      )}
+
       <div className="aspect-[2/3] bg-gray-200 relative">
         <Link href={`/movies/${id}`} className="block w-full h-full">
           {poster ? (
@@ -81,6 +142,39 @@ export const MovieCard = ({
           </div>
         )}
       </div>
+
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+            <h3 className="text-lg font-bold mb-4">Delete Rating</h3>
+            <p className="mb-6">Are you sure you want to delete your rating for &quot;{title}&quot;? This action cannot be undone.</p>
+            
+            {error && (
+              <div className="bg-red-50 p-3 rounded text-red-500 text-sm mb-4">
+                {error}
+              </div>
+            )}
+            
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

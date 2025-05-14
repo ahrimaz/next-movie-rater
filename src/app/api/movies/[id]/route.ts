@@ -4,6 +4,7 @@ import prisma from "@/lib/db";
 import { authOptions } from "@/lib/auth";
 
 interface ExtendedUser {
+  id?: string;
   isAdmin?: boolean;
   [key: string]: unknown;
 }
@@ -51,8 +52,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const session = await getServerSession(authOptions);
     
-    // Check if user is authenticated and is admin
-    if (!session || !(session.user as ExtendedUser).isAdmin) {
+    // Check if user is authenticated
+    if (!session || !session.user) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
@@ -63,13 +64,30 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     
     // Check if movie exists
     const existingMovie = await prisma.movie.findUnique({
-      where: { id }
+      where: { id },
+      include: { 
+        user: {
+          select: { id: true }
+        } 
+      }
     });
     
     if (!existingMovie) {
       return NextResponse.json(
         { success: false, error: "Movie not found" },
         { status: 404 }
+      );
+    }
+    
+    // Check if user is authorized (either admin or the owner of the movie)
+    const currentUser = session.user as ExtendedUser;
+    const isAdmin = currentUser.isAdmin === true;
+    const isOwner = currentUser.id === existingMovie.user.id;
+    
+    if (!isAdmin && !isOwner) {
+      return NextResponse.json(
+        { success: false, error: "Not authorized to edit this movie" },
+        { status: 403 }
       );
     }
     
@@ -109,8 +127,8 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     const { id } = await params;
     const session = await getServerSession(authOptions);
     
-    // Check if user is authenticated and is admin
-    if (!session || !(session.user as ExtendedUser).isAdmin) {
+    // Check if user is authenticated
+    if (!session || !session.user) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
@@ -119,13 +137,30 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     
     // Check if movie exists
     const existingMovie = await prisma.movie.findUnique({
-      where: { id }
+      where: { id },
+      include: { 
+        user: {
+          select: { id: true }
+        } 
+      }
     });
     
     if (!existingMovie) {
       return NextResponse.json(
         { success: false, error: "Movie not found" },
         { status: 404 }
+      );
+    }
+    
+    // Check if user is authorized (either admin or the owner of the movie)
+    const currentUser = session.user as ExtendedUser;
+    const isAdmin = currentUser.isAdmin === true;
+    const isOwner = currentUser.id === existingMovie.user.id;
+    
+    if (!isAdmin && !isOwner) {
+      return NextResponse.json(
+        { success: false, error: "Not authorized to delete this movie" },
+        { status: 403 }
       );
     }
     
