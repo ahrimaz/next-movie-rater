@@ -9,6 +9,8 @@ export type Movie = {
   review?: string;
   createdAt: Date;
   updatedAt: Date;
+  userId?: string;
+  user?: User;
 };
 
 // User related types

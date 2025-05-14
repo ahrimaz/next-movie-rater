@@ -8,11 +8,13 @@ The site allows:
 - Public viewing of all admin ratings
 - Shareable links for user profiles and individual movie ratings
 - User-friendly URLs with usernames instead of IDs
+- Community ratings display on homepage
 
 Each user's ratings are associated with their account and displayed on their own page. Users can share their personal ratings via a shareable link using their username instead of a complex ID.
 
 ## Recent Updates
 
+- **Community Ratings**: Homepage now displays latest 3 community ratings below admin picks
 - **Username from Name**: Users' names are now automatically used as their profile username
 - **User-friendly URLs**: Spaces in names are converted to hyphens in URLs (e.g., "John Doe" becomes "john-doe")
 - **Homepage Update**: Homepage now shows only the latest 3 admin movie ratings with a "View All" link
@@ -31,7 +33,7 @@ Each user's ratings are associated with their account and displayed on their own
 next-movie-rater/
 ├── src/
 │   ├── app/
-│   │   ├── page.tsx                  # Homepage - displays admin's 3 latest ratings
+│   │   ├── page.tsx                  # Homepage - displays admin's 3 latest ratings and 3 latest community ratings
 │   │   ├── layout.tsx                # Root layout
 │   │   ├── admin/                    # Admin section (protected)
 │   │   │   ├── page.tsx              # Admin dashboard
@@ -45,6 +47,8 @@ next-movie-rater/
 │   │   │   └── edit/[id]/page.tsx    # Edit existing rating (for user)
 │   │   ├── profiles/                 # Public user profiles
 │   │   │   └── [userId]/page.tsx     # Public profile with shareable link (supports username or ID)
+│   │   ├── community-ratings/        # Community ratings
+│   │   │   └── page.tsx              # All user community ratings
 │   │   ├── movies/                   # Admin movie ratings
 │   │   │   ├── page.tsx              # All admin movies list
 │   │   │   └── [id]/page.tsx         # Single movie details (with sharing)
@@ -120,7 +124,9 @@ model User {
 
 1. **Public**
    - View admin movie ratings (limited to 3 on homepage)
+   - View latest community ratings from all users (limited to 3 on homepage)
    - View full list of admin ratings
+   - View full list of community ratings
    - View single movie details
    - Sort/filter movies by rating, date, etc.
    - Register for an account
@@ -148,9 +154,11 @@ Fetches movie ratings with various filter options:
 
 - `?userId={id}` - Filter movies by specific user ID
 - `?isAdmin=true` - Return only movies created by admin users
+- `?isAdmin=false` - Return only movies created by non-admin users
 - `?limit={number}` - Limit the number of results returned
 
 Example: `/api/movies?isAdmin=true&limit=3` fetches the 3 most recent admin ratings
+Example: `/api/movies?isAdmin=false&limit=3` fetches the 3 most recent community ratings
 
 ### GET /api/users/[userId]
 Fetches a user's public profile information:
@@ -268,6 +276,14 @@ The application uses NextAuth.js for authentication with custom registration:
    - Update homepage queries to only display admin ratings (limited to 3)
    - Add "View All" link to the full admin ratings page
    - Ensure proper filtering of movies by admin user ID
+
+5b. **Community Ratings Integration**
+   - Add community ratings section on the homepage below admin ratings
+   - Create API query for latest non-admin user ratings with limit=3
+   - Add a "View All Community Ratings" link to full community ratings page
+   - Create a new page to view all community ratings at /community-ratings
+   - Implement visual separation between admin and community sections
+   - Include user attribution for each community rating
 
 6. **User Profile Implementation**
    - Create user profile page that displays only that user's ratings

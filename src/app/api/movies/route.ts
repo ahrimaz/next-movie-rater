@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
-    const isAdmin = searchParams.get("isAdmin") === "true";
+    const isAdminParam = searchParams.get("isAdmin");
     const limitParam = searchParams.get("limit");
     const limit = limitParam ? parseInt(limitParam) : undefined;
     
@@ -40,7 +40,9 @@ export async function GET(request: Request) {
         include: {
           user: {
             select: {
+              id: true,
               name: true,
+              username: true,
               email: true,
               isAdmin: true
             }
@@ -49,8 +51,8 @@ export async function GET(request: Request) {
         ...(limit && { take: limit })
       });
     } 
-    // Only show admin movies if isAdmin flag is set
-    else if (isAdmin) {
+    // Only show admin movies if isAdmin=true
+    else if (isAdminParam === "true") {
       const adminUsers = await prisma.user.findMany({
         where: {
           isAdmin: true
@@ -71,7 +73,42 @@ export async function GET(request: Request) {
         include: {
           user: {
             select: {
+              id: true,
               name: true,
+              username: true,
+              email: true,
+              isAdmin: true
+            }
+          }
+        },
+        ...(limit && { take: limit })
+      });
+    }
+    // Only show non-admin (community) movies if isAdmin=false
+    else if (isAdminParam === "false") {
+      const adminUsers = await prisma.user.findMany({
+        where: {
+          isAdmin: true
+        }
+      });
+      
+      const adminUserIds = adminUsers.map(user => user.id);
+      
+      movies = await prisma.movie.findMany({
+        where: {
+          userId: {
+            notIn: adminUserIds
+          }
+        },
+        orderBy: {
+          createdAt: "desc"
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
               email: true,
               isAdmin: true
             }
@@ -89,7 +126,9 @@ export async function GET(request: Request) {
         include: {
           user: {
             select: {
+              id: true,
               name: true,
+              username: true,
               email: true,
               isAdmin: true
             }

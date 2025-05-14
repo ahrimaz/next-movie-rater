@@ -11,20 +11,12 @@ import ShareButton from "@/components/ShareButton";
 import { Movie } from "@/types";
 import { notFound } from "next/navigation";
 
-// Extended movie type to include user info
-interface ExtendedMovie extends Movie {
-  user?: {
-    id: string;
-    name?: string;
-    isAdmin?: boolean;
-  };
-}
-
+// Using the User type from types/index.ts directly
 export default function MoviePage() {
   const params = useParams();
   const id = params.id as string;
   
-  const [movie, setMovie] = useState<Partial<ExtendedMovie> | null>(null);
+  const [movie, setMovie] = useState<Movie | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [shareUrl, setShareUrl] = useState<string>("");
@@ -147,7 +139,7 @@ export default function MoviePage() {
             {movie.user && (
               <div className="mb-4 text-gray-600">
                 Rated by:{' '}
-                <Link href={`/profiles/${movie.user.id}`} className="text-blue-600 hover:underline">
+                <Link href={`/profiles/${movie.user.username || movie.user.id}`} className="text-blue-600 hover:underline">
                   {movie.user.name || (movie.user.isAdmin ? 'Admin' : 'User')}
                 </Link>
                 {movie.user.isAdmin && (

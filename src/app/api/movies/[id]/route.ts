@@ -20,6 +20,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
           select: {
             id: true,
             name: true,
+            username: true,
+            email: true,
             isAdmin: true
           }
         }

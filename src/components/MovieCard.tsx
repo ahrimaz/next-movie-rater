@@ -2,6 +2,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import RatingStars from './RatingStars';
 
+type User = {
+  id: string;
+  name?: string;
+  username?: string;
+  isAdmin?: boolean;
+};
+
 type MovieProps = {
   id: string;
   title: string;
@@ -9,9 +16,20 @@ type MovieProps = {
   year?: number;
   poster?: string;
   rating: number;
+  user?: User;
+  showUser?: boolean;
 };
 
-export const MovieCard = ({ id, title, director, year, poster, rating }: MovieProps) => {
+export const MovieCard = ({ 
+  id, 
+  title, 
+  director, 
+  year, 
+  poster, 
+  rating, 
+  user, 
+  showUser = false 
+}: MovieProps) => {
   return (
     <div className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition">
       <Link href={`/movies/${id}`} className="block">
@@ -47,6 +65,18 @@ export const MovieCard = ({ id, title, director, year, poster, rating }: MoviePr
           <div className="mt-3">
             <RatingStars rating={rating} />
           </div>
+
+          {showUser && user && (
+            <div className="mt-3 text-sm text-gray-600">
+              Rated by: {' '}
+              <Link 
+                href={`/profiles/${user.username || user.id}`}
+                className="text-blue-600 hover:underline"
+              >
+                {user.name || user.username || 'User'}
+              </Link>
+            </div>
+          )}
         </div>
       </Link>
     </div>
