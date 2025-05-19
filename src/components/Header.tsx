@@ -31,41 +31,56 @@ export default function Header({ showAdminLink = true }: HeaderProps) {
   };
 
   return (
-    <header className="border-b mb-8 pb-4">
-      <div className="flex justify-between items-center">
-        <div>
-          <Link href="/" className="text-2xl font-bold text-blue-600">
-            Movie Rater
+    <header className="bg-gray-950 py-4 px-4 sticky top-0 z-50 border-b border-gray-800">
+      <div className="max-w-5xl mx-auto flex justify-between items-center">
+        <div className="flex items-center">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">
+              MR
+            </div>
+            <span className="text-xl font-bold text-blue-500">Movie Rater</span>
           </Link>
         </div>
 
         <nav className="relative">
-          <div className="flex items-center space-x-4">
-            <Link href="/movies" className="text-gray-700 hover:text-blue-600">
+          <div className="hidden md:flex items-center space-x-6">
+            <Link 
+              href="/movies" 
+              className="text-gray-300 hover:text-white transition-colors"
+            >
               Admin Ratings
             </Link>
             
-            <Link href="/community-ratings" className="text-gray-700 hover:text-blue-600">
+            <Link 
+              href="/community-ratings" 
+              className="text-gray-300 hover:text-white transition-colors"
+            >
               Community Ratings
             </Link>
 
             {isAuthenticated ? (
               <>
                 {isAdmin && showAdminLink && (
-                  <Link href="/admin" className="text-gray-700 hover:text-blue-600">
+                  <Link 
+                    href="/admin" 
+                    className="text-gray-300 hover:text-white transition-colors"
+                  >
                     Admin
                   </Link>
                 )}
                 
                 {!isAdmin && (
-                  <Link href="/user" className="text-gray-700 hover:text-blue-600">
+                  <Link 
+                    href="/user" 
+                    className="text-gray-300 hover:text-white transition-colors"
+                  >
                     My Ratings
                   </Link>
                 )}
                 
                 <button
                   onClick={toggleMenu}
-                  className="flex items-center text-gray-700 hover:text-blue-600"
+                  className="flex items-center text-gray-300 hover:text-white transition-colors"
                 >
                   {session.user?.name || session.user?.email || "Account"}
                   <svg
@@ -80,10 +95,10 @@ export default function Header({ showAdminLink = true }: HeaderProps) {
                 </button>
                 
                 {isMenuOpen && (
-                  <div className="absolute right-0 mt-2 top-full w-48 bg-white rounded-md shadow-lg z-10 py-1">
+                  <div className="absolute right-0 mt-2 top-full w-48 bg-gray-800 rounded-md shadow-lg z-10 py-1 border border-gray-700">
                     <Link
                       href={userProfilePath}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       View My Profile
@@ -91,7 +106,7 @@ export default function Header({ showAdminLink = true }: HeaderProps) {
                     
                     <Link
                       href="/user/settings/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Edit Profile
@@ -99,7 +114,7 @@ export default function Header({ showAdminLink = true }: HeaderProps) {
                     
                     <Link
                       href="/user/settings"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Account Settings
@@ -108,7 +123,7 @@ export default function Header({ showAdminLink = true }: HeaderProps) {
                     {isAdmin ? (
                       <Link
                         href="/admin/add"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         Add New Rating
@@ -116,7 +131,7 @@ export default function Header({ showAdminLink = true }: HeaderProps) {
                     ) : (
                       <Link
                         href="/user/add"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         Add New Rating
@@ -128,7 +143,7 @@ export default function Header({ showAdminLink = true }: HeaderProps) {
                         signOut({ callbackUrl: "/" });
                         setIsMenuOpen(false);
                       }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
                     >
                       Sign Out
                     </button>
@@ -137,18 +152,25 @@ export default function Header({ showAdminLink = true }: HeaderProps) {
               </>
             ) : (
               <>
-                <Link href="/auth/signin" className="text-gray-700 hover:text-blue-600">
+                <Link href="/auth/signin" className="text-gray-300 hover:text-white transition-colors">
                   Sign In
                 </Link>
                 <Link 
                   href="/auth/signup" 
-                  className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors"
                 >
                   Sign Up
                 </Link>
               </>
             )}
           </div>
+          
+          {/* Mobile menu button */}
+          <button className="md:hidden text-gray-300 hover:text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
         </nav>
       </div>
     </header>
