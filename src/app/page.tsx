@@ -66,7 +66,7 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto">
           <div className="relative z-10">
             <div className="mb-4">
-              <span className="bg-blue-600 text-white px-3 py-1 text-sm font-medium rounded-full">New Experience</span>
+              <span className="bg-blue-600 text-white px-3 py-1 text-sm font-medium rounded-full">A New Experience</span>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold mb-4">Movie Rater</h1>
             <p className="text-gray-300 text-lg md:text-xl max-w-2xl mb-8">
