@@ -187,7 +187,7 @@ export default function UserProfile() {
           <div className="flex flex-col md:flex-row md:items-center gap-6">
             {/* Profile image */}
             <div className="flex-shrink-0">
-              <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center"> {/* bg-gray-200 to bg-gray-700 */}
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
                 {user.profileImage ? (
                   <Image 
                     src={user.profileImage} 
@@ -197,7 +197,7 @@ export default function UserProfile() {
                     className="object-cover w-full h-full"
                   />
                 ) : (
-                  <span className="text-3xl text-gray-500"> {/* text-gray-400 to text-gray-500 (darker placeholder) */}
+                  <span className="text-3xl text-gray-500">
                     {user.name?.charAt(0).toUpperCase() || "U"}
                   </span>
                 )}
@@ -208,19 +208,19 @@ export default function UserProfile() {
             <div className="flex-grow">
               <div className="flex justify-between items-start">
                 <div>
-                  <h1 className="text-3xl font-bold mb-1 text-white">{user.name || "User"}</h1> {/* text-white */}
+                  <h1 className="text-3xl font-bold mb-1 text-white">{user.name || "User"}</h1>
                   {user.username && (
-                    <p className="text-gray-400">@{user.username}</p> {/* text-gray-600 to text-gray-400 */}
+                    <p className="text-gray-400">@{user.username}</p>
                   )}
-                  <p className="text-gray-500 text-sm"> {/* text-gray-500 is fine for less emphasis */}
+                  <p className="text-gray-500 text-sm">
                     Member since {new Date(user.createdAt || "").toLocaleDateString()}
                   </p>
                 </div>
-                <ShareButton url={shareUrl} title="Share This Profile" /> {/* ShareButton may need internal text color review if it assumes light bg */}
+                <ShareButton url={shareUrl} title="Share This Profile" />
               </div>
               
               {user.bio && (
-                <div className="mt-4 text-gray-300"> {/* text-gray-700 to text-gray-300 */}
+                <div className="mt-4 text-gray-300">
                   <p>{user.bio}</p>
                 </div>
               )}
@@ -228,7 +228,7 @@ export default function UserProfile() {
               {user.favoriteGenres && user.favoriteGenres.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-2">
                   {user.favoriteGenres.map(genre => (
-                    <span key={genre} className="inline-block bg-gray-700 rounded-full px-3 py-1 text-sm text-gray-300"> {/* bg-gray-100 to bg-gray-700, text-gray-700 to text-gray-300 */}
+                    <span key={genre} className="inline-block bg-gray-700 rounded-full px-3 py-1 text-sm text-gray-300">
                       {genre}
                     </span>
                   ))}
@@ -240,25 +240,25 @@ export default function UserProfile() {
         
         {/* Stats Section */}
         <section className="mb-10 bg-[var(--background-card)] rounded-lg shadow-sm p-6 border border-[var(--border-dark)]">
-          <h2 className="text-xl font-bold mb-4 text-white">Rating Statistics</h2> {/* text-white */}
+          <h2 className="text-xl font-bold mb-4 text-white">Rating Statistics</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Stats */}
             <div className="space-y-3">
-              <div className="bg-gray-700 p-3 rounded-lg"> {/* bg-gray-50 to bg-gray-700 */}
-                <h3 className="text-sm text-gray-400 mb-1">Total Movies Rated</h3> {/* text-gray-500 to text-gray-400 */}
-                <p className="text-2xl font-bold text-white">{ratingStats.count}</p> {/* text-white */}
+              <div className="bg-gray-700 p-3 rounded-lg">
+                <h3 className="text-sm text-gray-400 mb-1">Total Movies Rated</h3>
+                <p className="text-2xl font-bold text-white">{ratingStats.count}</p>
               </div>
               
-              <div className="bg-gray-700 p-3 rounded-lg"> {/* bg-gray-50 to bg-gray-700 */}
-                <h3 className="text-sm text-gray-400 mb-1">Average Rating</h3> {/* text-gray-500 to text-gray-400 */}
-                <p className="text-2xl font-bold text-white">{ratingStats.average}</p> {/* text-white */}
+              <div className="bg-gray-700 p-3 rounded-lg">
+                <h3 className="text-sm text-gray-400 mb-1">Average Rating</h3>
+                <p className="text-2xl font-bold text-white">{ratingStats.average}</p>
               </div>
               
               {favoriteMovies.length > 0 && (
-                <div className="bg-gray-700 p-3 rounded-lg"> {/* bg-gray-50 to bg-gray-700 */}
-                  <h3 className="text-sm text-gray-400 mb-1">Favorite Movies</h3> {/* text-gray-500 to text-gray-400 */}
-                  <p className="text-2xl font-bold text-white">{favoriteMovies.length}</p> {/* text-white */}
+                <div className="bg-gray-700 p-3 rounded-lg">
+                  <h3 className="text-sm text-gray-400 mb-1">Favorite Movies</h3>
+                  <p className="text-2xl font-bold text-white">{favoriteMovies.length}</p>
                 </div>
               )}
             </div>
@@ -283,12 +283,12 @@ export default function UserProfile() {
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: 'var(--background-card)', border: '1px solid var(--border-dark)' }} itemStyle={{ color: 'var(--text-primary)' }}/> {/* Tooltip styling for dark theme */}
-                    <Legend wrapperStyle={{ color: 'var(--text-secondary)' }} /> {/* Legend styling for dark theme */}
+                    <Tooltip contentStyle={{ backgroundColor: 'var(--background-card)', border: '1px solid var(--border-dark)' }} itemStyle={{ color: 'var(--text-primary)' }}/>
+                    <Legend wrapperStyle={{ color: 'var(--text-secondary)' }} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center text-gray-500"> {/* text-gray-500 is fine here */}
+                <div className="h-full flex items-center justify-center text-gray-500">
                   No rating data available
                 </div>
               )}
@@ -299,7 +299,7 @@ export default function UserProfile() {
         {/* Favorite Movies Section (if any) */}
         {favoriteMovies.length > 0 && (
           <section className="mb-10">
-            <h2 className="text-xl font-bold mb-4 text-white">Favorite Movies</h2> {/* text-white */}
+            <h2 className="text-xl font-bold mb-4 text-white">Favorite Movies</h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {favoriteMovies.map((movie) => (
                 <MovieCard 
@@ -319,14 +319,14 @@ export default function UserProfile() {
         {/* All Movies Section */}
         <section className="mb-10">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-white">All Movie Ratings</h2> {/* text-white */}
+            <h2 className="text-xl font-bold text-white">All Movie Ratings</h2>
             
             {/* Sort options */}
             <div className="flex items-center">
-              <label htmlFor="sort" className="mr-2 text-sm text-gray-400">Sort by:</label> {/* text-gray-600 to text-gray-400 */}
+              <label htmlFor="sort" className="mr-2 text-sm text-gray-400">Sort by:</label>
               <select
                 id="sort"
-                className="border border-[var(--border-dark)] bg-gray-700 text-white rounded-md p-1 text-sm focus:ring-[var(--primary-blue)] focus:border-[var(--primary-blue)]" /* Style select for dark theme */
+                className="border border-[var(--border-dark)] bg-gray-700 text-white rounded-md p-1 text-sm focus:ring-[var(--primary-blue)] focus:border-[var(--primary-blue)]"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
               >
@@ -339,9 +339,9 @@ export default function UserProfile() {
           </div>
           
           {sortedMovies.length === 0 ? (
-            <div className="text-center py-10 border border-[var(--border-dark)] rounded-lg p-8 bg-[var(--background-card)]"> {/* Dark theme for empty state box */}
-              <h3 className="text-xl font-semibold mb-2 text-white">No Ratings Yet</h3> {/* text-white */}
-              <p className="text-gray-400"> {/* text-gray-500 to text-gray-400 */}
+            <div className="text-center py-10 border border-[var(--border-dark)] rounded-lg p-8 bg-[var(--background-card)]">
+              <h3 className="text-xl font-semibold mb-2 text-white">No Ratings Yet</h3>
+              <p className="text-gray-400">
                 This user hasn&apos;t shared any movie ratings yet.
               </p>
             </div>
@@ -364,12 +364,6 @@ export default function UserProfile() {
 
         {/* Movie Lists Section */}
         <section className="mb-10">
-          {/* 
-            The UserMovieLists component handles its own title ("Your Movie Lists")
-            and overall layout. We just need to provide a section wrapper.
-            It also handles its own loading/error/empty states.
-            The userId prop is essential.
-          */}
           {user?.id && <UserMovieLists userId={user.id} />}
         </section>
       </main>
