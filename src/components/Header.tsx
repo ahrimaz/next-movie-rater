@@ -157,7 +157,7 @@ export default function Header({ showAdminLink = true }: HeaderProps) {
                 </Link>
                 <Link 
                   href="/auth/signup" 
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors"
+                  className="bg-[var(--primary-blue)] hover:bg-[var(--primary-hover)] text-white px-4 py-2 rounded-md transition-colors"
                 >
                   Sign Up
                 </Link>

@@ -98,17 +98,17 @@ export default function MoviePage() {
         <div className="flex justify-between items-center mb-6">
           <Link 
             href="/movies" 
-            className="inline-flex items-center text-blue-600 hover:underline"
+            className="inline-flex items-center text-[var(--primary-blue)] hover:text-[var(--primary-hover)] hover:underline"
           >
             ← Back to all movies
           </Link>
           
-          <ShareButton url={shareUrl} title="Share This Rating" />
+          <ShareButton url={shareUrl} title="Share This Rating" /> {/* Assuming ShareButton is theme-agnostic or uses its own consistent styling */}
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Movie poster */}
-          <div className="aspect-[2/3] bg-gray-200 rounded overflow-hidden">
+          <div className="aspect-[2/3] bg-gray-700 rounded overflow-hidden"> {/* bg-gray-200 to bg-gray-700 */}
             {movie.poster ? (
               <div className="relative w-full h-full">
                 <Image
@@ -120,7 +120,7 @@ export default function MoviePage() {
                 />
               </div>
             ) : (
-              <div className="flex items-center justify-center w-full h-full bg-gray-300 text-gray-500">
+              <div className="flex items-center justify-center w-full h-full bg-gray-700 text-gray-400"> {/* bg-gray-300 to bg-gray-700, text-gray-500 to text-gray-400 */}
                 No poster available
               </div>
             )}
@@ -128,42 +128,42 @@ export default function MoviePage() {
           
           {/* Movie details */}
           <div className="md:col-span-2">
-            <h1 className="text-3xl font-bold mb-2">{movie.title}</h1>
+            <h1 className="text-3xl font-bold mb-2 text-white">{movie.title}</h1> {/* Added text-white for explicit dark theme */}
             
             <div className="flex items-center mb-4">
               <RatingStars rating={movie.rating || 0} size="lg" />
-              <span className="ml-2 font-semibold">{movie.rating}/5</span>
+              <span className="ml-2 font-semibold text-white">{movie.rating}/5</span> {/* Added text-white */}
             </div>
             
             {/* Rated by information with link to profile */}
             {movie.user && (
-              <div className="mb-4 text-gray-600">
+              <div className="mb-4 text-gray-300"> {/* text-gray-600 to text-gray-300 */}
                 Rated by:{' '}
-                <Link href={`/profiles/${movie.user.username || movie.user.id}`} className="text-blue-600 hover:underline">
+                <Link href={`/profiles/${movie.user.username || movie.user.id}`} className="text-[var(--primary-blue)] hover:text-[var(--primary-hover)] hover:underline">
                   {movie.user.name || (movie.user.isAdmin ? 'Admin' : 'User')}
                 </Link>
                 {movie.user.isAdmin && (
-                  <span className="ml-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">
+                  <span className="ml-1 px-2 py-0.5 text-xs bg-gray-700 text-[var(--primary-blue)] rounded-full border border-[var(--primary-blue)]"> {/* bg-blue-100/text-blue-800 to dark theme badge */}
                     Admin
                   </span>
                 )}
               </div>
             )}
             
-            <div className="mb-6 space-y-2">
+            <div className="mb-6 space-y-2 text-gray-300"> {/* Added text-gray-300 for p tags */}
               {movie.director && (
-                <p><span className="font-semibold">Director:</span> {movie.director}</p>
+                <p><span className="font-semibold text-white">Director:</span> {movie.director}</p> {/* Emphasize key with text-white */}
               )}
               
               {movie.year && (
-                <p><span className="font-semibold">Year:</span> {movie.year}</p>
+                <p><span className="font-semibold text-white">Year:</span> {movie.year}</p> {/* Emphasize key with text-white */}
               )}
             </div>
             
             {movie.review && (
               <div className="mt-8">
-                <h2 className="text-xl font-semibold mb-3">Review</h2>
-                <div className="prose prose-slate">
+                <h2 className="text-xl font-semibold mb-3 text-white">Review</h2> {/* text-white */}
+                <div className="prose prose-invert max-w-none"> {/* prose-slate to prose-invert for dark bg, max-w-none if needed */}
                   <p>{movie.review}</p>
                 </div>
               </div>

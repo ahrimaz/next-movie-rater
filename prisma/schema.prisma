@@ -8,7 +8,6 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 model Movie {
@@ -25,6 +24,7 @@ model Movie {
   user        User     @relation(fields: [userId], references: [id])
   isFavorite  Boolean  @default(false)
   isPublic    Boolean  @default(true)
+  listItems   MovieListItem[] // Relation to MovieListItem
 }
 
 model User {
@@ -43,4 +43,26 @@ model User {
   themeColor    String?   // User's preferred theme color (hex code)
   isProfilePublic Boolean @default(true) // Whether profile is public or private
   favoriteGenres String[]  // Array of favorite genres
+
+  movieLists MovieList[] // Relation to MovieList
 } 
+
+model MovieList {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  movies      MovieListItem[]
+}
+
+model MovieListItem {
+  id          String   @id @default(cuid())
+  movieListId String
+  movieList   MovieList @relation(fields: [movieListId], references: [id])
+  movieId     String
+  movie       Movie    @relation(fields: [movieId], references: [id])
+  addedAt     DateTime @default(now())
+}
