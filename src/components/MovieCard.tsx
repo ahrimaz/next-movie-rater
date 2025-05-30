@@ -25,6 +25,7 @@ type MovieProps = {
   user?: User;
   showUser?: boolean;
   badge?: string;
+  compact?: boolean;
 };
 
 export const MovieCard = ({ 
@@ -36,7 +37,8 @@ export const MovieCard = ({
   rating, 
   user, 
   showUser = false,
-  badge
+  badge,
+  compact = false
 }: MovieProps) => {
   const { data: session } = useSession();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -70,14 +72,20 @@ export const MovieCard = ({
   };
 
   return (
-    <div className="card-hover border border-gray-700 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition relative bg-gray-800">
+    <div className={`card-hover border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition relative ${
+      compact 
+        ? 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800' 
+        : 'border-gray-700 bg-gray-800'
+    }`}>
       <div 
-        className="aspect-[2/3] bg-gray-700 relative group"
+        className="aspect-[2/3] bg-gray-700 dark:bg-gray-600 relative group"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {badge && (
-          <div className="absolute top-2 right-2 bg-gray-800 text-white px-3 py-1 text-sm font-medium rounded-md z-10">
+          <div className={`absolute top-2 right-2 bg-gray-800 text-white font-medium rounded-md z-10 ${
+            compact ? 'px-2 py-1 text-xs' : 'px-3 py-1 text-sm'
+          }`}>
             {badge}
           </div>
         )}
@@ -91,7 +99,7 @@ export const MovieCard = ({
                 className="object-cover transition-all duration-300"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
-              {isHovered && (
+              {isHovered && !compact && (
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent transition-opacity duration-300 flex flex-col items-center justify-end p-4">
                   <Link 
                     href={`/movies/${id}`}
@@ -103,19 +111,25 @@ export const MovieCard = ({
               )}
             </div>
           ) : (
-            <div className="flex items-center justify-center w-full h-full bg-gray-700 text-gray-400">
-              No poster
+            <div className="flex items-center justify-center w-full h-full bg-gray-700 dark:bg-gray-600 text-gray-400">
+              {compact ? <span className="text-xs">No poster</span> : "No poster"}
             </div>
           )}
         </Link>
       </div>
       
-      <div className="p-4">
+      <div className={compact ? 'p-2' : 'p-4'}>
         <Link href={`/movies/${id}`}>
-          <h3 className="text-xl font-semibold text-white hover:text-blue-400 transition-colors">{title}</h3>
+          <h3 className={`font-semibold hover:text-blue-400 transition-colors ${
+            compact 
+              ? 'text-sm text-gray-900 dark:text-white truncate' 
+              : 'text-xl text-white'
+          }`}>
+            {title}
+          </h3>
         </Link>
         
-        {(director || year) && (
+        {!compact && (director || year) && (
           <p className="text-gray-400 mt-1">
             {director && director}
             {director && year && ', '}
@@ -123,11 +137,11 @@ export const MovieCard = ({
           </p>
         )}
         
-        <div className="mt-3">
-          <RatingStars rating={rating} />
+        <div className={compact ? 'mt-1' : 'mt-3'}>
+          <RatingStars rating={rating} size={compact ? 'sm' : 'md'} />
         </div>
 
-        {showUser && user && (
+        {showUser && user && !compact && (
           <div className="mt-3 text-sm text-gray-400">
             Rated by: {' '}
             <Link 
@@ -140,7 +154,7 @@ export const MovieCard = ({
         )}
         
         {/* Action buttons for owner - more visible at bottom of card */}
-        {isOwner && (
+        {isOwner && !compact && (
           <div className="mt-4 pt-3 border-t border-gray-700 flex justify-between">
             <Link 
               href={`/user/edit/${id}`}
