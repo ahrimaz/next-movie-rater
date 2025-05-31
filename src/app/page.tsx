@@ -16,6 +16,20 @@ export default function HomePage() {
   const [adminError, setAdminError] = useState<string | null>(null);
   const [communityError, setCommunityError] = useState<string | null>(null);
 
+  // Function to refresh movies data
+  const refreshMovies = async () => {
+    // Refresh community movies
+    try {
+      const response = await fetch(`/api/movies?isAdmin=false&limit=3`);
+      const data = await response.json();
+      if (data.success) {
+        setCommunityMovies(data.data);
+      }
+    } catch (error) {
+      console.error("Error refreshing community movies:", error);
+    }
+  };
+
   useEffect(() => {
     async function fetchAdminMovies() {
       try {
@@ -52,7 +66,7 @@ export default function HomePage() {
         setIsLoadingCommunity(false);
       }
     }
-    
+
     fetchAdminMovies();
     fetchCommunityMovies();
   }, []);
@@ -136,6 +150,9 @@ export default function HomePage() {
                   year={movie.year}
                   poster={movie.poster}
                   rating={movie.rating}
+                  user={movie.user}
+                  isFavorite={movie.isFavorite}
+                  onFavoriteChange={refreshMovies}
                   badge={index === 0 ? "New Release" : index === 2 ? "Staff Pick" : undefined}
                 />
               ))}
@@ -221,7 +238,7 @@ export default function HomePage() {
           {isLoadingCommunity ? (
             <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-              <p className="mt-2 text-gray-400">Loading community ratings...</p>
+              <p className="mt-2 text-gray-400">Loading community picks...</p>
             </div>
           ) : communityError ? (
             <div className="bg-red-900/50 p-4 rounded-md text-red-300">
@@ -244,6 +261,8 @@ export default function HomePage() {
                   rating={movie.rating}
                   user={movie.user}
                   showUser={true}
+                  isFavorite={movie.isFavorite}
+                  onFavoriteChange={refreshMovies}
                 />
               ))}
             </div>

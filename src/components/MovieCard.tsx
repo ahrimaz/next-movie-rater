@@ -26,6 +26,8 @@ type MovieProps = {
   showUser?: boolean;
   badge?: string;
   compact?: boolean;
+  isFavorite?: boolean;
+  onFavoriteChange?: () => void;
 };
 
 export const MovieCard = ({ 
@@ -38,13 +40,17 @@ export const MovieCard = ({
   user, 
   showUser = false,
   badge,
-  compact = false
+  compact = false,
+  isFavorite = false,
+  onFavoriteChange
 }: MovieProps) => {
   const { data: session } = useSession();
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [isFavoriteState, setIsFavoriteState] = useState(isFavorite);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
   const isOwner = session?.user && user && (session.user as SessionUser).id === user.id;
 
@@ -71,6 +77,35 @@ export const MovieCard = ({
     }
   };
 
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!isOwner || isTogglingFavorite) return;
+    
+    try {
+      setIsTogglingFavorite(true);
+      
+      const response = await fetch(`/api/movies/${id}/favorite`, {
+        method: 'PATCH',
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update favorite status');
+      }
+      
+      setIsFavoriteState(data.data.isFavorite);
+      onFavoriteChange?.();
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
+      alert(err instanceof Error ? err.message : 'Failed to update favorite status');
+    } finally {
+      setIsTogglingFavorite(false);
+    }
+  };
+
   return (
     <div className={`card-hover border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition relative ${
       compact 
@@ -89,6 +124,35 @@ export const MovieCard = ({
             {badge}
           </div>
         )}
+        
+        {/* Favorite button for owner */}
+        {isOwner && (
+          <button
+            onClick={handleToggleFavorite}
+            disabled={isTogglingFavorite}
+            className={`absolute top-2 left-2 p-2 rounded-full transition-all duration-200 z-20 ${
+              isFavoriteState 
+                ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg scale-110' 
+                : 'bg-black/50 hover:bg-black/70 text-white'
+            } ${isTogglingFavorite ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110'}`}
+            title={isFavoriteState ? 'Remove from favorites' : 'Add to favorites'}
+          >
+            <svg 
+              className={`w-4 h-4 transition-all duration-200 ${
+                isFavoriteState ? 'fill-current' : 'stroke-current fill-none'
+              }`} 
+              viewBox="0 0 24 24" 
+              strokeWidth={2}
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" 
+              />
+            </svg>
+          </button>
+        )}
+        
         <Link href={`/movies/${id}`} className="block w-full h-full">
           {poster ? (
             <div className="relative w-full h-full">
@@ -101,12 +165,9 @@ export const MovieCard = ({
               />
               {isHovered && !compact && (
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent transition-opacity duration-300 flex flex-col items-center justify-end p-4">
-                  <Link 
-                    href={`/movies/${id}`}
-                    className="bg-gray-800 hover:bg-gray-700 text-white w-full py-3 rounded-md font-medium transition-colors shadow-lg text-center"
-                  >
+                  <div className="bg-gray-800 hover:bg-gray-700 text-white w-full py-3 rounded-md font-medium transition-colors shadow-lg text-center">
                     View Details
-                  </Link>
+                  </div>
                 </div>
               )}
             </div>

@@ -99,6 +99,23 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       );
     }
     
+    // If trying to set as favorite, check limit
+    if (body.isFavorite === true && !existingMovie.isFavorite) {
+      const currentFavoriteCount = await prisma.movie.count({
+        where: {
+          userId: existingMovie.userId,
+          isFavorite: true
+        }
+      });
+      
+      if (currentFavoriteCount >= 4) {
+        return NextResponse.json(
+          { success: false, error: "You can only have up to 4 favorite movies" },
+          { status: 400 }
+        );
+      }
+    }
+    
     const movie = await prisma.movie.update({
       where: { id },
       data: {
@@ -108,6 +125,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         poster: body.poster !== undefined ? body.poster || null : undefined,
         rating: body.rating || undefined,
         review: body.review !== undefined ? body.review || null : undefined,
+        isFavorite: body.isFavorite !== undefined ? body.isFavorite : undefined,
       }
     });
     

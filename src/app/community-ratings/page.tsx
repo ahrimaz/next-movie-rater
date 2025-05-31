@@ -12,6 +12,19 @@ export default function CommunityRatingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Function to refresh movies data
+  const refreshMovies = async () => {
+    try {
+      const response = await fetch(`/api/movies?isAdmin=false`);
+      const data = await response.json();
+      if (data.success) {
+        setMovies(data.data);
+      }
+    } catch (error) {
+      console.error("Error refreshing community movies:", error);
+    }
+  };
+
   useEffect(() => {
     async function fetchCommunityMovies() {
       try {
@@ -76,6 +89,8 @@ export default function CommunityRatingsPage() {
                   rating={movie.rating}
                   user={movie.user}
                   showUser={true}
+                  isFavorite={movie.isFavorite}
+                  onFavoriteChange={refreshMovies}
                 />
               ))}
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Header from "@/components/Header";
@@ -35,88 +35,88 @@ export default function UserProfile() {
     topGenres: []
   });
   
+  // Helper function to get monthly activity
+  const getMonthlyActivity = useCallback((movieData: Movie[]) => {
+    const months = [];
+    const now = new Date();
+    
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = date.toISOString().substring(0, 7);
+      const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+      
+      const count = movieData.filter(movie => {
+        const movieDate = new Date(movie.createdAt);
+        const movieMonthKey = movieDate.toISOString().substring(0, 7);
+        return movieMonthKey === monthKey;
+      }).length;
+      
+      months.push({ month: monthName, count });
+    }
+    
+    return months;
+  }, []);
+  
+  // Helper function to get top genres (mock implementation)
+  const getTopGenres = useCallback((movieData: Movie[]) => {
+    // This would normally use actual genre data from TMDB
+    // For now, returning mock data based on user's favorite genres
+    const genres = user?.favoriteGenres || ['Action', 'Drama', 'Comedy'];
+    return genres.slice(0, 3).map((genre, index) => ({
+      genre,
+      count: Math.floor(movieData.length * (0.4 - index * 0.1)),
+      avgRating: 4.5 - index * 0.3
+    }));
+  }, [user?.favoriteGenres]);
+
+  // Calculate comprehensive rating statistics
+  const calculateRatingStats = useCallback((movieData: Movie[]) => {
+    if (!movieData.length) {
+      setRatingStats({
+        average: 0,
+        count: 0,
+        distribution: [],
+        monthlyActivity: [],
+        topGenres: []
+      });
+      return;
+    }
+
+    // Calculate average rating
+    const sum = movieData.reduce((acc, movie) => acc + movie.rating, 0);
+    const avg = sum / movieData.length;
+    
+    // Calculate rating distribution
+    const dist = [0, 0, 0, 0, 0]; // For ratings 1-5
+    movieData.forEach(movie => {
+      if (movie.rating >= 1 && movie.rating <= 5) {
+        dist[movie.rating - 1]++;
+      }
+    });
+    
+    const distribution = dist.map((count, index) => ({
+      name: `${index + 1} Star${index === 0 ? '' : 's'}`,
+      value: count,
+      rating: index + 1
+    }));
+    
+    // Calculate monthly activity (last 6 months)
+    const monthlyActivity = getMonthlyActivity(movieData);
+    
+    // Calculate top genres (mock data for now - would need genre data from TMDB)
+    const topGenres = getTopGenres(movieData);
+    
+    setRatingStats({
+      average: parseFloat(avg.toFixed(1)),
+      count: movieData.length,
+      distribution,
+      monthlyActivity,
+      topGenres
+    });
+  }, [getMonthlyActivity, getTopGenres]);
+  
   // Fetch user's details and movies
   useEffect(() => {
-    // Helper function to get monthly activity
-    const getMonthlyActivity = (movieData: Movie[]) => {
-      const months = [];
-      const now = new Date();
-      
-      for (let i = 5; i >= 0; i--) {
-        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const monthKey = date.toISOString().substring(0, 7);
-        const monthName = date.toLocaleDateString('en-US', { month: 'short' });
-        
-        const count = movieData.filter(movie => {
-          const movieDate = new Date(movie.createdAt);
-          const movieMonthKey = movieDate.toISOString().substring(0, 7);
-          return movieMonthKey === monthKey;
-        }).length;
-        
-        months.push({ month: monthName, count });
-      }
-      
-      return months;
-    };
-    
-    // Helper function to get top genres (mock implementation)
-    const getTopGenres = (movieData: Movie[]) => {
-      // This would normally use actual genre data from TMDB
-      // For now, returning mock data based on user's favorite genres
-      const genres = user?.favoriteGenres || ['Action', 'Drama', 'Comedy'];
-      return genres.slice(0, 3).map((genre, index) => ({
-        genre,
-        count: Math.floor(movieData.length * (0.4 - index * 0.1)),
-        avgRating: 4.5 - index * 0.3
-      }));
-    };
-
-    // Calculate comprehensive rating statistics
-    const calculateRatingStats = (movieData: Movie[]) => {
-      if (!movieData.length) {
-        setRatingStats({
-          average: 0,
-          count: 0,
-          distribution: [],
-          monthlyActivity: [],
-          topGenres: []
-        });
-        return;
-      }
-
-      // Calculate average rating
-      const sum = movieData.reduce((acc, movie) => acc + movie.rating, 0);
-      const avg = sum / movieData.length;
-      
-      // Calculate rating distribution
-      const dist = [0, 0, 0, 0, 0]; // For ratings 1-5
-      movieData.forEach(movie => {
-        if (movie.rating >= 1 && movie.rating <= 5) {
-          dist[movie.rating - 1]++;
-        }
-      });
-      
-      const distribution = dist.map((count, index) => ({
-        name: `${index + 1} Star${index === 0 ? '' : 's'}`,
-        value: count,
-        rating: index + 1
-      }));
-      
-      // Calculate monthly activity (last 6 months)
-      const monthlyActivity = getMonthlyActivity(movieData);
-      
-      // Calculate top genres (mock data for now - would need genre data from TMDB)
-      const topGenres = getTopGenres(movieData);
-      
-      setRatingStats({
-        average: parseFloat(avg.toFixed(1)),
-        count: movieData.length,
-        distribution,
-        monthlyActivity,
-        topGenres
-      });
-    };
-
     async function fetchUserProfile() {
       try {
         // First fetch user data using ID or username
@@ -154,7 +154,7 @@ export default function UserProfile() {
     }
     
     fetchUserProfile();
-  }, [userId, user?.favoriteGenres]);
+  }, [userId, calculateRatingStats]);
   
   // Sort movies based on selected option
   const sortedMovies = [...movies].sort((a, b) => {
@@ -176,7 +176,22 @@ export default function UserProfile() {
   
   // Favorite movies and featured movies
   const favoriteMovies = movies.filter(movie => movie.isFavorite);
-  const featuredMovies = favoriteMovies.length > 0 ? favoriteMovies.slice(0, 8) : sortedMovies.slice(0, 8);
+  const featuredMovies = favoriteMovies.length > 0 ? favoriteMovies.slice(0, 4) : sortedMovies.slice(0, 4);
+  
+  // Function to refresh movie data when favorites change
+  const refreshMovies = async () => {
+    try {
+      const moviesResponse = await fetch(`/api/movies?userId=${user?.id}`);
+      const moviesData = await moviesResponse.json();
+      
+      if (moviesData.success) {
+        setMovies(moviesData.data);
+        calculateRatingStats(moviesData.data);
+      }
+    } catch (error) {
+      console.error("Error refreshing movies:", error);
+    }
+  };
   
   // Handle loading state
   if (isLoading) {
@@ -350,9 +365,23 @@ export default function UserProfile() {
             {/* Featured Ratings */}
             {featuredMovies.length > 0 && (
               <section>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                  {favoriteMovies.length > 0 ? "Featured Ratings" : "Top Ratings"}
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {favoriteMovies.length > 0 ? "My Favorite Films" : "Top Ratings"}
+                  </h2>
+                  {favoriteMovies.length > 0 && (
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {favoriteMovies.length}/4 favorites selected
+                    </span>
+                  )}
+                </div>
+                
+                {favoriteMovies.length > 0 && (
+                  <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm">
+                    These are my hand-picked favorite films that showcase my taste in cinema.
+                  </p>
+                )}
+                
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                   {featuredMovies.map((movie) => (
                     <div key={movie.id} className="transform hover:scale-105 transition-transform duration-200">
@@ -363,6 +392,9 @@ export default function UserProfile() {
                         year={movie.year}
                         poster={movie.poster}
                         rating={movie.rating}
+                        user={movie.user}
+                        isFavorite={movie.isFavorite}
+                        onFavoriteChange={refreshMovies}
                       />
                     </div>
                   ))}
@@ -413,7 +445,10 @@ export default function UserProfile() {
                         year={movie.year}
                         poster={movie.poster}
                         rating={movie.rating}
+                        user={movie.user}
                         compact={true}
+                        isFavorite={movie.isFavorite}
+                        onFavoriteChange={refreshMovies}
                       />
                     </div>
                   ))}
